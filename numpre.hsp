@@ -1,0 +1,3793 @@
+#packopt name "ナンプレ解析ツール" // 実行ファイル名
+
+#include "hspmath.as" // 数学関数用
+#include "list.as"    // リスト構造
+
+// ウィンドウサイズ
+#define WINDOW_W 800
+#define WINDOW_H 600
+// 数独1マスの長さ
+#define MASS_LENGTH 40
+// 数独9マス全ての長さ
+#define MASS9_LENGTH 40*9
+// 描画開始座標(余白分)
+#define DRAW_POS_X 20
+#define DRAW_POS_Y 20
+// マスの中の数字のマス上での座標
+#define NUM_POS_X 13
+#define NUM_POS_Y 6
+// 描画関係の定義
+#define LINE_THICK        1 // 線の太さのサイズ
+#define BUTTON_EDGE_THICK 0 // ボタンの縁の太さのサイズ
+#define FONT_SIZE_L  32 // フォントサイズ大
+#define FONT_SIZE_M  14 // フォントサイズ中
+#define FONT_SIZE_S  12 // フォントサイズ小
+#define FONT_SIZE_SS 10 // フォントサイズ極小
+#define FONT_NAME "ＭＳ ゴシック" // フォント名
+#define COLOR_BLACK          0,   0,   0 // 黒色
+#define COLOR_RED          255,   0,   0 // 赤色
+#define COLOR_BLUE           0,   0, 255 // 青色
+#define COLOR_GREEN          0, 255,   0 // 緑色
+#define COLOR_YELLOW       220, 204,   0 // 黄色
+#define COLOR_LIGHT_YELLOW 255, 243, 184 // 薄い黄色
+#define COLOR_SKYBLUE      157, 204, 224 // 水色
+#define COLOR_GRAY         200, 200, 200 // 灰色
+#define COLOR_DEEP_GRAY    160, 160, 160 // 深い灰色
+#define COLOR_WHITE        255, 255, 255 // 白色
+// 各ボタンサイズ
+#define BUTTON_SIZE_LL_WIDTH   354 // ボタンサイズ極大の幅
+#define BUTTON_SIZE_LL_HEIGHT   24 // ボタンサイズ極大の高さ
+#define BUTTON_SIZE_L_WIDTH    176 // ボタンサイズ大の幅
+#define BUTTON_SIZE_L_HEIGHT    24 // ボタンサイズ大の高さ
+#define BUTTON_SIZE_M_WIDTH    110 // ボタンサイズ中の幅
+#define BUTTON_SIZE_M_HEIGHT    24 // ボタンサイズ中の高さ
+#define BUTTON_SIZE_MS_WIDTH    69 // ボタンサイズ中の小の幅
+#define BUTTON_SIZE_MS_HEIGHT   24 // ボタンサイズ中の小の高さ
+#define BUTTON_SIZE_MSS_WIDTH   82 // ボタンサイズ中の極小の幅
+#define BUTTON_SIZE_MSS_HEIGHT  24 // ボタンサイズ中の極小の高さ
+#define BUTTON_SIZE_MSSS_WIDTH  46 // ボタンサイズ中の極極小の幅
+#define BUTTON_SIZE_MSSS_HEIGHT 24 // ボタンサイズ中の極極小の高さ
+#define BUTTON_SIZE_SS_WIDTH    25 // ボタンサイズ極小の幅
+#define BUTTON_SIZE_SS_HEIGHT   24 // ボタンサイズ極小の高さ
+#define BUTTON_SIZE_SSS_WIDTH   12 // ボタンサイズ極極小の幅
+#define BUTTON_SIZE_SSS_HEIGHT  24 // ボタンサイズ極極小の高さ
+#define PLAY_BUTTON_WIDTH           BUTTON_SIZE_M_WIDTH
+#define PLAY_BUTTON_HEIGHT          BUTTON_SIZE_M_HEIGHT
+#define EDIT_BUTTON_WIDTH           BUTTON_SIZE_M_WIDTH
+#define EDIT_BUTTON_HEIGHT          BUTTON_SIZE_M_HEIGHT
+#define AUTO_BUTTON_WIDTH           BUTTON_SIZE_M_WIDTH
+#define AUTO_BUTTON_HEIGHT          BUTTON_SIZE_M_HEIGHT
+#define NEW_BUTTON_WIDTH            BUTTON_SIZE_M_WIDTH
+#define NEW_BUTTON_HEIGHT           BUTTON_SIZE_M_HEIGHT
+#define MAKE_CANDIATE_BUTTON_WIDTH  BUTTON_SIZE_M_WIDTH
+#define MAKE_CANDIATE_BUTTON_HEIGHT BUTTON_SIZE_M_HEIGHT
+#define MAKE_PROBLEM_BUTTON_WIDTH   BUTTON_SIZE_M_WIDTH
+#define MAKE_PROBLEM_BUTTON_HEIGHT  BUTTON_SIZE_M_HEIGHT
+#define LEVEL_DOWN_BUTTON_WIDTH     BUTTON_SIZE_SSS_WIDTH
+#define LEVEL_DOWN_BUTTON_HEIGHT    BUTTON_SIZE_SSS_HEIGHT
+#define LEVEL_UP_BUTTON_WIDTH       BUTTON_SIZE_SSS_WIDTH
+#define LEVEL_UP_BUTTON_HEIGHT      BUTTON_SIZE_SSS_HEIGHT
+#define NUMBER_BUTTON_WIDTH         BUTTON_SIZE_SS_WIDTH
+#define NUMBER_BUTTON_HEIGHT        BUTTON_SIZE_SS_HEIGHT
+#define DELETE_BUTTON_WIDTH         BUTTON_SIZE_MSSS_WIDTH
+#define DELETE_BUTTON_HEIGHT        BUTTON_SIZE_MSSS_HEIGHT
+#define MOVE_BUTTON_WIDTH           BUTTON_SIZE_MS_WIDTH
+#define MOVE_BUTTON_HEIGHT          BUTTON_SIZE_MS_HEIGHT
+#define MARK_BUTTON_WIDTH           BUTTON_SIZE_MSSS_WIDTH
+#define MARK_BUTTON_HEIGHT          BUTTON_SIZE_MSSS_HEIGHT
+#define LOGIC_BUTTON_WIDTH          BUTTON_SIZE_LL_WIDTH
+#define LOGIC_BUTTON_HEIGHT         BUTTON_SIZE_LL_HEIGHT
+#define LOGIC_BACK_BUTTON_WIDTH     BUTTON_SIZE_SSS_WIDTH*2
+#define LOGIC_BACK_BUTTON_HEIGHT    BUTTON_SIZE_SSS_HEIGHT
+#define LOGIC_NEXT_BUTTON_WIDTH     BUTTON_SIZE_SSS_WIDTH*2
+#define LOGIC_NEXT_BUTTON_HEIGHT    BUTTON_SIZE_SSS_HEIGHT
+#define ANALYZE_BUTTON_WIDTH        BUTTON_SIZE_M_WIDTH
+#define ANALYZE_BUTTON_HEIGHT       BUTTON_SIZE_M_HEIGHT
+#define ANSWER_BUTTON_WIDTH         BUTTON_SIZE_M_WIDTH
+#define ANSWER_BUTTON_HEIGHT        BUTTON_SIZE_M_HEIGHT
+#define CHECK_BUTTON_WIDTH          BUTTON_SIZE_M_WIDTH
+#define CHECK_BUTTON_HEIGHT         BUTTON_SIZE_M_HEIGHT
+#define HINT1_BUTTON_WIDTH          BUTTON_SIZE_M_WIDTH
+#define HINT1_BUTTON_HEIGHT         BUTTON_SIZE_M_HEIGHT
+#define HINT2_BUTTON_WIDTH          BUTTON_SIZE_M_WIDTH
+#define HINT2_BUTTON_HEIGHT         BUTTON_SIZE_M_HEIGHT
+#define SAVE_BUTTON_WIDTH           BUTTON_SIZE_MSS_WIDTH
+#define SAVE_BUTTON_HEIGHT          BUTTON_SIZE_MSS_HEIGHT
+#define LOAD_BUTTON_WIDTH           BUTTON_SIZE_MSS_WIDTH
+#define LOAD_BUTTON_HEIGHT          BUTTON_SIZE_MSS_HEIGHT
+// 各ボタン間隔
+#define MODE_BUTTON_MARGIN_X                                                 35
+#define MODE_BUTTON_MARGIN_Y                                                 65
+#define MODE_BUTTON_DISTANCE_X                            (PLAY_BUTTON_WIDTH+31)
+#define MODE_BUTTON_DISTANCE_Y                                               34
+#define ONOFF_BUTTON_MARGIN_X       MODE_BUTTON_MARGIN_X+MODE_BUTTON_DISTANCE_X
+#define ONOFF_BUTTON_MARGIN_Y (MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y*2+20)
+#define ONOFF_BUTTON_DISTANCE_X                         (ANSWER_BUTTON_WIDTH+21)
+#define ONOFF_BUTTON_DISTANCE_Y                                              34
+#define LOGIC_BUTTON_MARGIN_X                              MODE_BUTTON_MARGIN_X
+#define LOGIC_BUTTON_MARGIN_Y                                               359
+#define LOGIC_BUTTON_DISTANCE_Y                                              34
+#define NUMBER_BUTTON_DISTANCE_X                                             35
+#define MOVE_BUTTON_DISTANCE_X                           (MOVE_BUTTON_WIDTH+10) // 各ムーブボタンの間隔
+// 有効範囲エリア余白
+#define AREA_BUTTON_MARGIN_S  3
+#define AREA_BUTTON_MARGIN_M  5
+#define AREA_BUTTON_MARGIN_L 10
+// 各ボタンの左上座標
+#define PLAY_BUTTON_POS_X          DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X+MODE_BUTTON_DISTANCE_X
+#define PLAY_BUTTON_POS_Y          DRAW_POS_Y+MODE_BUTTON_MARGIN_Y
+#define EDIT_BUTTON_POS_X          DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define EDIT_BUTTON_POS_Y          DRAW_POS_Y+MODE_BUTTON_MARGIN_Y
+#define AUTO_BUTTON_POS_X          DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X+MODE_BUTTON_DISTANCE_X
+#define AUTO_BUTTON_POS_Y          DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y
+#define NEW_BUTTON_POS_X           DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define NEW_BUTTON_POS_Y           DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y
+#define MAKE_CANDIATE_BUTTON_POS_X DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define MAKE_CANDIATE_BUTTON_POS_Y DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y*2
+#define MAKE_PROBLEM_BUTTON_POS_X  DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define MAKE_PROBLEM_BUTTON_POS_Y  DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y*3
+#define LEVEL_DOWN_BUTTON_POS_X    DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define LEVEL_DOWN_BUTTON_POS_Y    DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y*4
+#define LEVEL_UP_BUTTON_POS_X      DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X+BUTTON_SIZE_M_WIDTH-LEVEL_UP_BUTTON_WIDTH
+#define LEVEL_UP_BUTTON_POS_Y      DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y*4
+#define LOGIC_BUTTON_POS_X         DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define LOGIC_BUTTON_POS_Y         DRAW_POS_Y+LOGIC_BUTTON_MARGIN_Y
+#define LOGIC_BACK_BUTTON_POS_X    DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define LOGIC_BACK_BUTTON_POS_Y    DRAW_POS_Y+LOGIC_BUTTON_MARGIN_Y+LOGIC_BUTTON_DISTANCE_Y
+#define LOGIC_NEXT_BUTTON_POS_X    DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X+LOGIC_BUTTON_WIDTH-LOGIC_NEXT_BUTTON_WIDTH
+#define LOGIC_NEXT_BUTTON_POS_Y    DRAW_POS_Y+LOGIC_BUTTON_MARGIN_Y+LOGIC_BUTTON_DISTANCE_Y
+#define ANALYZE_BUTTON_POS_X       DRAW_POS_X+MASS9_LENGTH+ONOFF_BUTTON_MARGIN_X
+#define ANALYZE_BUTTON_POS_Y       DRAW_POS_Y+ONOFF_BUTTON_MARGIN_Y
+#define ANSWER_BUTTON_POS_X        DRAW_POS_X+MASS9_LENGTH+ONOFF_BUTTON_MARGIN_X
+#define ANSWER_BUTTON_POS_Y        DRAW_POS_Y+ONOFF_BUTTON_MARGIN_Y+ONOFF_BUTTON_DISTANCE_Y
+#define CHECK_BUTTON_POS_X         DRAW_POS_X+MASS9_LENGTH+ONOFF_BUTTON_MARGIN_X
+#define CHECK_BUTTON_POS_Y         DRAW_POS_Y+ONOFF_BUTTON_MARGIN_Y+ONOFF_BUTTON_DISTANCE_Y*2
+#define HINT1_BUTTON_POS_X         DRAW_POS_X+MASS9_LENGTH+ONOFF_BUTTON_MARGIN_X
+#define HINT1_BUTTON_POS_Y         DRAW_POS_Y+ONOFF_BUTTON_MARGIN_Y+ONOFF_BUTTON_DISTANCE_Y*3
+#define HINT2_BUTTON_POS_X         DRAW_POS_X+MASS9_LENGTH+ONOFF_BUTTON_MARGIN_X
+#define HINT2_BUTTON_POS_Y         DRAW_POS_Y+ONOFF_BUTTON_MARGIN_Y+ONOFF_BUTTON_DISTANCE_Y*4
+/*
+#define LOGIC0_BUTTON_POS_X        DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define LOGIC0_BUTTON_POS_Y        DRAW_POS_Y+325
+#define LOGIC1_BUTTON_POS_X        DRAW_POS_X+MASS9_LENGTH+40
+#define LOGIC1_BUTTON_POS_Y        DRAW_POS_Y+355
+#define LOGIC2_BUTTON_POS_X        DRAW_POS_X+MASS9_LENGTH+40
+#define LOGIC2_BUTTON_POS_Y        DRAW_POS_Y+385
+*/
+#define NUMBER_BUTTON_POS_X        DRAW_POS_X
+#define NUMBER_BUTTON_POS_Y        DRAW_POS_Y+MASS9_LENGTH+10
+#define MOVE_BUTTON_POS_X          DRAW_POS_X
+#define MOVE_BUTTON_POS_Y          DRAW_POS_Y+MASS9_LENGTH+43
+#define MARK_BUTTON_POS_X          DRAW_POS_X+MOVE_BUTTON_DISTANCE_X*3+MOVE_BUTTON_WIDTH+9
+#define MARK_BUTTON_POS_Y          DRAW_POS_Y+MASS9_LENGTH+43
+#define SAVE_BUTTON_POS_X          DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X+MODE_BUTTON_DISTANCE_X+PLAY_BUTTON_WIDTH+AREA_BUTTON_MARGIN_L*3
+#define SAVE_BUTTON_POS_Y          DRAW_POS_Y+MODE_BUTTON_MARGIN_Y
+#define LOAD_BUTTON_POS_X          DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X+MODE_BUTTON_DISTANCE_X+PLAY_BUTTON_WIDTH+AREA_BUTTON_MARGIN_L*3
+#define LOAD_BUTTON_POS_Y          DRAW_POS_Y+MODE_BUTTON_MARGIN_Y+MODE_BUTTON_DISTANCE_Y
+// メッセージ表示領域の左上座標
+#define DISP_STAGE_STATUS_POS_X  DRAW_POS_X
+#define DISP_STAGE_STATUS_POS_Y  0
+#define DISP_MODE_POS_X          DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define DISP_MODE_POS_Y          DRAW_POS_Y
+#define DISP_STATUS_POS_X        DRAW_POS_X+MASS9_LENGTH+MODE_BUTTON_MARGIN_X
+#define DISP_STATUS_POS_Y        DRAW_POS_Y+40
+#define DISP_ANALYZE_POS_X       ANALYZE_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X
+#define DISP_ANALYZE_POS_Y       ANALYZE_BUTTON_POS_Y+(ANALYZE_BUTTON_HEIGHT-FONT_SIZE_M)/2
+#define DISP_ANSWER_POS_X        ANSWER_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X
+#define DISP_ANSWER_POS_Y        ANSWER_BUTTON_POS_Y+(ANSWER_BUTTON_HEIGHT-FONT_SIZE_M)/2
+#define DISP_CHECK_POS_X         CHECK_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X
+#define DISP_CHECK_POS_Y         CHECK_BUTTON_POS_Y+(CHECK_BUTTON_HEIGHT-FONT_SIZE_M)/2
+#define DISP_HINT1_POS_X         HINT1_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X
+#define DISP_HINT1_POS_Y         HINT1_BUTTON_POS_Y+(HINT1_BUTTON_HEIGHT-FONT_SIZE_M)/2
+#define DISP_HINT2_POS_X         HINT2_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X
+#define DISP_HINT2_POS_Y         HINT2_BUTTON_POS_Y+(HINT2_BUTTON_HEIGHT-FONT_SIZE_M)/2
+#define DISP_MESSAGE_POS_X       HINT2_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X-4
+#define DISP_MESSAGE_POS_Y       HINT2_BUTTON_POS_Y+HINT2_BUTTON_HEIGHT
+#define DISP_LOGIC_TYPE_POS_X             DRAW_POS_X+MASS9_LENGTH+120
+#define DISP_LOGIC_TYPE_POS_Y             WINDOW_H-12
+#define DISP_STATUS_AREA_Y                MOVE_BUTTON_POS_Y+MOVE_BUTTON_HEIGHT+10
+#define DISP_LOGIC_HEIGHT                 16
+#define DISP_OTHER_WIDTH                  100
+#define DISP_STATUS_MARGIN_X              4
+#define DISP_STATUS_MARGIN_Y              4
+#define DISP_LOGIC_STATUS_POS_X1          DRAW_POS_X
+#define DISP_LOGIC_STATUS_POS_Y1          DISP_STATUS_AREA_Y
+#define DISP_LOGIC_STATUS_POS_X2          WINDOW_W-DRAW_POS_X
+#define DISP_LOGIC_STATUS_POS_Y2          WINDOW_H-DRAW_POS_Y
+#define DISP_FIND_TITLE_POS_X             DRAW_POS_X+DISP_STATUS_MARGIN_X
+#define DISP_FIND_TITLE_POS_Y             DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y
+#define DISP_FIND_BOX_POS_X               DRAW_POS_X+DISP_STATUS_MARGIN_X+120
+#define DISP_FIND_BOX_POS_Y               DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y
+#define DISP_FIND_HORIZON_POS_X           DRAW_POS_X+DISP_STATUS_MARGIN_X+120+70
+#define DISP_FIND_HORIZON_POS_Y           DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y
+#define DISP_FIND_VERTICAL_POS_X          DRAW_POS_X+DISP_STATUS_MARGIN_X+120+70*2
+#define DISP_FIND_VERTICAL_POS_Y          DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y
+#define DISP_FIND_ONE_MASS_POS_X          DRAW_POS_X+DISP_STATUS_MARGIN_X+120+70*3
+#define DISP_FIND_ONE_MASS_POS_Y          DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y
+#define DISP_LOCKED1_TITLE_POS_X          DRAW_POS_X+DISP_STATUS_MARGIN_X
+#define DISP_LOCKED1_TITLE_POS_Y          DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED1_COUNT_POS_X          DRAW_POS_X+DISP_STATUS_MARGIN_X+120
+#define DISP_LOCKED1_COUNT_POS_Y          DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED1_AVERAGE_POS_X        DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50
+#define DISP_LOCKED1_AVERAGE_POS_Y        DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED1_MAX_POS_X            DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50+100
+#define DISP_LOCKED1_MAX_POS_Y            DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED2_TITLE_POS_X          DRAW_POS_X+DISP_STATUS_MARGIN_X+128+50+100+120
+#define DISP_LOCKED2_TITLE_POS_Y          DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED2_COUNT_POS_X          DRAW_POS_X+DISP_STATUS_MARGIN_X+128+50+100+120+120
+#define DISP_LOCKED2_COUNT_POS_Y          DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED2_AVERAGE_POS_X        DRAW_POS_X+DISP_STATUS_MARGIN_X+128+50+100+120+120+50
+#define DISP_LOCKED2_AVERAGE_POS_Y        DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_LOCKED2_MAX_POS_X            DRAW_POS_X+DISP_STATUS_MARGIN_X+128+50+100+120+120+50+100
+#define DISP_LOCKED2_MAX_POS_Y            DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT
+#define DISP_NAKED_PAIRS_TITLE_POS_X      DRAW_POS_X+DISP_STATUS_MARGIN_X
+#define DISP_NAKED_PAIRS_TITLE_POS_Y      DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_PAIRS_COUNT_POS_X      DRAW_POS_X+DISP_STATUS_MARGIN_X+120
+#define DISP_NAKED_PAIRS_COUNT_POS_Y      DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_PAIRS_AVERAGE_POS_X    DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50
+#define DISP_NAKED_PAIRS_AVERAGE_POS_Y    DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_PAIRS_MAX_POS_X        DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50+100
+#define DISP_NAKED_PAIRS_MAX_POS_Y        DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_TRIPLETS_TITLE_POS_X   DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50+100+128
+#define DISP_NAKED_TRIPLETS_TITLE_POS_Y   DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_TRIPLETS_COUNT_POS_X   DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50+100+120+128
+#define DISP_NAKED_TRIPLETS_COUNT_POS_Y   DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_TRIPLETS_AVERAGE_POS_X DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50+100+120+128+50
+#define DISP_NAKED_TRIPLETS_AVERAGE_POS_Y DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_NAKED_TRIPLETS_MAX_POS_X     DRAW_POS_X+DISP_STATUS_MARGIN_X+120+50+100+120+128+50+100
+#define DISP_NAKED_TRIPLETS_MAX_POS_Y     DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*2
+#define DISP_OTHER_TITLE_POS_X            DRAW_POS_X+DISP_STATUS_MARGIN_X
+#define DISP_OTHER_TITLE_POS_Y            DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*3
+#define DISP_OTHER_POS_X                  DRAW_POS_X+DISP_STATUS_MARGIN_X+120
+#define DISP_OTHER_POS_Y                  DISP_STATUS_AREA_Y+DISP_STATUS_MARGIN_Y+DISP_LOGIC_HEIGHT*3
+
+// プレイモードボタン有効範囲を示す長方形座標
+#define PLAY_MODE_AREA_POS_X1    PLAY_BUTTON_POS_X-AREA_BUTTON_MARGIN_L
+#define PLAY_MODE_AREA_POS_Y1    PLAY_BUTTON_POS_Y+PLAY_BUTTON_HEIGHT/2
+#define PLAY_MODE_AREA_POS_X2    PLAY_BUTTON_POS_X+PLAY_BUTTON_WIDTH+AREA_BUTTON_MARGIN_L
+#define PLAY_MODE_AREA_POS_Y2    PLAY_BUTTON_POS_Y+MODE_BUTTON_DISTANCE_Y+BUTTON_SIZE_M_HEIGHT+AREA_BUTTON_MARGIN_L
+// 編集モードボタン有効範囲を示す長方形座標
+#define EDIT_MODE_AREA_POS_X1    EDIT_BUTTON_POS_X-AREA_BUTTON_MARGIN_L
+#define EDIT_MODE_AREA_POS_Y1    EDIT_BUTTON_POS_Y+EDIT_BUTTON_HEIGHT/2
+#define EDIT_MODE_AREA_POS_X2    EDIT_BUTTON_POS_X+BUTTON_SIZE_M_WIDTH+AREA_BUTTON_MARGIN_L
+#define EDIT_MODE_AREA_POS_Y2    EDIT_BUTTON_POS_Y+MODE_BUTTON_DISTANCE_Y*4+BUTTON_SIZE_M_HEIGHT+AREA_BUTTON_MARGIN_L
+// 自動問題作成ボタン有効範囲を示す長方形座標
+#define MAKE_MODE_AREA_POS_X1    MAKE_PROBLEM_BUTTON_POS_X-AREA_BUTTON_MARGIN_S
+#define MAKE_MODE_AREA_POS_Y1    MAKE_PROBLEM_BUTTON_POS_Y-AREA_BUTTON_MARGIN_S
+#define MAKE_MODE_AREA_POS_X2    MAKE_PROBLEM_BUTTON_POS_X+MAKE_PROBLEM_BUTTON_WIDTH+AREA_BUTTON_MARGIN_S
+#define MAKE_MODE_AREA_POS_Y2    MAKE_PROBLEM_BUTTON_POS_Y+MODE_BUTTON_DISTANCE_Y+BUTTON_SIZE_M_HEIGHT+AREA_BUTTON_MARGIN_S
+// 表示機能ボタン有効範囲を示す長方形座標
+#define SUPPORT_AREA_POS_X1      ANALYZE_BUTTON_POS_X-AREA_BUTTON_MARGIN_L
+#define SUPPORT_AREA_POS_Y1      ANALYZE_BUTTON_POS_Y-AREA_BUTTON_MARGIN_L
+#define SUPPORT_AREA_POS_X2      ANALYZE_BUTTON_POS_X+ONOFF_BUTTON_DISTANCE_X+82+AREA_BUTTON_MARGIN_L
+#define SUPPORT_AREA_POS_Y2      ANALYZE_BUTTON_POS_Y+ONOFF_BUTTON_DISTANCE_Y*4+BUTTON_SIZE_M_HEIGHT+AREA_BUTTON_MARGIN_L+15
+// ロジックボタン有効範囲を示す長方形座標
+#define LOGIC_AREA_POS_X1        LOGIC_BUTTON_POS_X-AREA_BUTTON_MARGIN_L
+#define LOGIC_AREA_POS_Y1        LOGIC_BUTTON_POS_Y-AREA_BUTTON_MARGIN_L
+#define LOGIC_AREA_POS_X2        LOGIC_BUTTON_POS_X+LOGIC_BUTTON_WIDTH+AREA_BUTTON_MARGIN_L
+#define LOGIC_AREA_POS_Y2        LOGIC_BUTTON_POS_Y+MODE_BUTTON_DISTANCE_Y+BUTTON_SIZE_M_HEIGHT+AREA_BUTTON_MARGIN_L
+
+// ロジックタイプの定義
+#define LOGIC_CLEAR             0 // "全消去(初期化)"
+#define LOGIC_DEFAULT           1 // "縦,横,ブロック(標準)"
+#define LOGIC_LOCKED_1          2 // "ロックされた候補1"
+#define LOGIC_LOCKED_2          3 // "ロックされた候補2"
+#define LOGIC_NAKED_PAIRS       4 // "2国同盟"
+#define LOGIC_NAKED_TRIPLETS    5 // "3国同盟"
+#define LOGIC_NAKED_QUADS       6 // "4国同盟"
+#define LOGIC_NAKED_QUINTETS    7 // "5国同盟"
+#define LOGIC_NAKED_SEXTETS     8 // "6国同盟"
+#define LOGIC_NAKED_SEPTETTE    9 // "7国同盟"
+#define LOGIC_NAKED_OCTETS     10 // "8国同盟"
+#define LOGIC_X_WING           11 // "X-wing"
+#define LOGIC_SKYCRAPER        12 // "Skyscraper"
+#define LOGIC_2_STRING_KITE    13 // "2-StringKite"
+#define LOGIC_XY_WING          14 // "XY-wing"
+#define LOGIC_SWORDFISH        15 // "Swordfish"
+#define LOGIC_XYZ_WING         16 // "XYZ-wing"
+#define LOGIC_REMOTE_PAIRS     17 // "RemotePairs"
+#define LOGIC_SIMPLE_CHAIN     18 // "SimpleChain"
+#define LOGIC_BUG_1            19 // "BUG+1"
+#define LOGIC_XY_CHAIN         20 // "XY-Chain"
+#define LOGIC_JELLYFISH        21 // "Jellyfish"
+#define LOGIC_WXYZ_WING        22 // "WXYZ-wing"
+#define LOGIC_FINNED_X_WING    23 // "FinnedX-wing"
+#define LOGIC_FINNED_SWORDFISH 24 // "FinnedSwordfish"
+#define LOGIC_SQUIRMBAG        25 // "Squirmbag"
+#define LOGIC_WHALE            26 // "Whale"
+#define LOGIC_LEVIATHAN        27 // "Leviathan"
+
+// 各出力用文字列の定義
+#define STRING_TITLE_NAME          "ナンプレ解析ツール"
+#define STRING_BEGIN               "<<"
+#define STRING_END                 ">>"
+#define STRING_NEXT                ">"
+#define STRING_BACK                "<"
+#define STRING_MARK                "マーク"
+#define STRING_PLAY                "プレイモード"
+//#define STRING_ANALYZE             "解析モード"
+#define STRING_EDIT                "編集モード"
+#define STRING_AUTO                "ＡＩ回答"
+#define STRING_NEW                 "新規作成"
+#define STRING_MAKE_CANDIATE       "候補から作成"
+#define STRING_MAKE_PROBLEM        "自動問題作成"
+#define STRING_LOGIC               "候補にロジック適用"
+#define STRING_ANALYZE             "解析結果表示"
+#define STRING_ANSWER              "解答表示"
+#define STRING_CHECK               "チェック"
+#define STRING_HINT1               "強調表示"
+#define STRING_HINT2               "候補表示"
+#define STRING_LOGIC0              "候補を初期値へ"
+#define STRING_LOGIC1              "ロジックAで候補消去"
+#define STRING_LOGIC2              "ロジックBで候補消去"
+#define STRING_SAVE                "セーブ"
+#define STRING_LOAD                "ロード"
+#define STRING_ON                  "オン"
+#define STRING_OFF                 "オフ"
+#define STRING_LV_1                "レベル１"
+#define STRING_LV_2                "レベル２"
+#define STRING_LV_3                "レベル３"
+#define STRING_LV_4                "レベル４"
+#define STRING_LV_5                "レベル５"
+#define STRING_MESSAGE             "(右クリックで切替)"
+#define STRING_HINT2_MANUAL        "手動入力"
+#define STRING_HINT2_AUTO          "自動入力"
+#define STRING_CHECK_LOGIC         "論理的矛盾"
+#define STRING_CHECK_ANSWER        "解答と比較"
+#define STRING_MODE_PLAY           "プレイモード"
+#define STRING_MODE_ANALYZE        "解析モード"
+#define STRING_MODE_EDIT           "編集モード"
+#define STRING_MODE_CLEAR          "ゲームクリア！"
+#define STRING_MODE_NOT_CLEAR      "クリア失敗！"
+#define STRING_MODE_AUTO           "解答探索中..."
+#define STRING_MODE_MAKING         "問題作成中..."
+#define STRING_MODE_MAKE_CLEAR     "問題解析中..."
+#define STRING_FAILED_LOAD_FILE    "※ファイル読み込み失敗"
+#define STRING_FAILED_LOGIC        "※論理的矛盾"
+#define STRING_FAILED_TIMEOUT      "※解析失敗"
+#define STRING_FAILED_NOT_CLEAR    "※クリア不可能"
+#define STRING_FAILED_DOUBLE_CLEAR "※複数解答あり"
+#define STRING_FAILED_MAKE_PROBLEM "※問題作成失敗"
+#define STRING_DEBUG_LOGIC         "LOGIC TYPE"
+#define STRING_MESSAGE_EDIT        "編集モードへ移行すると、保存していない候補数字及び入力数字の履歴データは失われ、"\
+								  +"現在の入力数字のみ引き継がれます。\nよろしいですか？"
+#define STRING_MESSAGE_NEW         "すべての入力数字を消去すると、保存していないデータは失われます。\nよろしいですか？"
+#define STRING_MESSAGE_MAKE        "問題自動作成を行うと、保存していないデータは失われます。\nよろしいですか？"
+#define STRING_DELETE              "削除"
+#define STRING_DELETE_MARK         "*"
+#define STRING_FIND_TYPE              "シングル"
+#define STRING_FIND_BOX               "ボックス"
+#define STRING_FIND_HORIZON           "横ライン"
+#define STRING_FIND_VERTICAL          "縦ライン"
+#define STRING_FIND_ONE_MASS          "1マス"
+#define STRING_CANDIATE               "仮置き分岐数"
+#define STRING_LOGIC_COUNT            "出現数"
+#define STRING_LOGIC_AVERAGE          "ステップ数平均"
+#define STRING_LOGIC_MAX              "ステップ数最大"
+#define STRING_LOGIC_CLEAR            "全消去(初期化)"
+#define STRING_LOGIC_DEFAULT          "縦,横,ブロック(標準)"
+#define STRING_LOGIC_LOCKED_1         "ロックされた候補1"
+#define STRING_LOGIC_LOCKED_2         "ロックされた候補2"
+#define STRING_LOGIC_NAKED_PAIRS      "2国同盟"
+#define STRING_LOGIC_NAKED_TRIPLETS   "3国同盟"
+#define STRING_LOGIC_OTHER            "その他解法"
+#define STRING_LOGIC_NAKED_QUADS      "4国同盟"
+#define STRING_LOGIC_NAKED_QUINTETS   "5国同盟"
+#define STRING_LOGIC_NAKED_SEXTETS    "6国同盟"
+#define STRING_LOGIC_NAKED_SEPTETTE   "7国同盟"
+#define STRING_LOGIC_NAKED_OCTETS     "8国同盟"
+#define STRING_LOGIC_X_WING           "X-wing"
+#define STRING_LOGIC_SKYCRAPER        "Skyscraper"
+#define STRING_LOGIC_2_STRING_KITE    "2-StringKite"
+#define STRING_LOGIC_XY_WING          "XY-wing"
+#define STRING_LOGIC_SWORDFISH        "Swordfish"
+#define STRING_LOGIC_XYZ_WING         "XYZ-wing"
+#define STRING_LOGIC_REMOTE_PAIRS     "RemotePairs"
+#define STRING_LOGIC_SIMPLE_CHAIN     "SimpleChain"
+#define STRING_LOGIC_BUG_1            "BUG+1"
+#define STRING_LOGIC_XY_CHAIN         "XY-Chain"
+#define STRING_LOGIC_JELLYFISH        "Jellyfish"
+#define STRING_LOGIC_WXYZ_WING        "WXYZ-wing"
+#define STRING_LOGIC_FINNED_X_WING    "FinnedX-wing"
+#define STRING_LOGIC_FINNED_SWORDFISH "FinnedSwordfish"
+#define STRING_LOGIC_SQUIRMBAG        "Squirmbag"
+#define STRING_LOGIC_WHALE            "Whale"
+#define STRING_LOGIC_LEVIATHAN        "Leviathan"
+#define STRING_LOGIC_ENABLE           "適用済み"
+#define STRING_LOGIC_DISABLE          "適用不可"
+
+/******************************************************* カーソルキー受付無効処理 **************************************************/
+// カーソルキーの0次受付：キー押した瞬間にイベント発生、1次受付拒否時間をリセット後、1次受付へ
+// カーソルキーの1次受付：キーを押しても1次受付拒否時間の間、受付拒否
+//                        キーを押した状態ならば、1次受付拒否時間経過後、2次受付へ
+// カーソルキーの2次受付：キーを押した状態ならば、2次受付拒否時間経過後、イベント発生、2次受付拒否時間をリセット
+//                        以降、キーを押した状態ならば、2次受付を繰り返す
+// カーソルキーを離すと0次受付へと遷移する
+// 2次受付拒否時間より1次受付拒否時間の方が長いため、初動の押しすぎを防ぎ、かつ長押しによる高速移動にも対応している。
+// キーを離すことで初期化されるため、押す、離すの連続繰り返しにも高速に対抗。
+/************************************************************************************************************************************/
+#define CUR_LEFT  0 // 左カーソルキー
+#define CUR_UP    1 // 上カーソルキー
+#define CUR_RIGHT 2 // 右カーソルキー
+#define CUR_DOWN  3 // 下カーソルキー
+
+#define LOOP_EVENT_TIME  20 // メインループの更新間隔               20ms
+#define CUR_REJECT_TIME1 15 // カーソルキーの1次受付拒否時間 15*20=300ms
+#define CUR_REJECT_TIME2  2 // カーソルキーの2次受付拒否時間  20*2= 40ms
+
+#define MOVE_MAX 82*16 // プレイ時のアンドゥ履歴の配列サイズ 4byte*(9*9+2)*82*16=435584byte=425Kbyte
+
+// 各ボタンイベント番号の定義
+#define BUTTON_EVENT_PLAY          1
+#define BUTTON_EVENT_EDIT          2
+#define BUTTON_EVENT_AUTO          3
+#define BUTTON_EVENT_NEW           4
+#define BUTTON_EVENT_MAKE_CANDIATE 5
+#define BUTTON_EVENT_MAKE_PROBLEM  6
+#define BUTTON_EVENT_LEVEL_DOWN    7
+#define BUTTON_EVENT_LEVEL_UP      8
+#define BUTTON_EVENT_MOVE_BEGIN    9
+#define BUTTON_EVENT_MOVE_END     10
+#define BUTTON_EVENT_MOVE_NEXT    11
+#define BUTTON_EVENT_MOVE_BACK    12
+#define BUTTON_EVENT_ANALYZE      13
+#define BUTTON_EVENT_ANSWER       14
+#define BUTTON_EVENT_CHECK        15
+#define BUTTON_EVENT_HINT1        16
+#define BUTTON_EVENT_HINT2        17
+#define BUTTON_EVENT_SAVE         18
+#define BUTTON_EVENT_LOAD         19
+#define BUTTON_EVENT_LOGIC        20
+#define BUTTON_EVENT_LOGIC_BACK   21
+#define BUTTON_EVENT_LOGIC_NEXT   22
+#define BUTTON_EVENT_MARK         23
+#define BUTTON_EVENT_1            51
+#define BUTTON_EVENT_2            52
+#define BUTTON_EVENT_3            53
+#define BUTTON_EVENT_4            54
+#define BUTTON_EVENT_5            55
+#define BUTTON_EVENT_6            56
+#define BUTTON_EVENT_7            57
+#define BUTTON_EVENT_8            58
+#define BUTTON_EVENT_9            59
+#define BUTTON_EVENT_0            60
+
+// 各モード値の定義
+#define MODE_PLAY       1 // プレイモード
+//#define MODE_ANALYZE    2 // 解析モード
+#define MODE_EDIT       3 // 編集モード
+#define MODE_CLEAR      4 // 問題クリア成功(全てマスを埋めた状態)※プレイモード時遷移
+#define MODE_NOT_CLEAR  5 // 問題クリア失敗(全てマスを埋めた状態)※プレイモード時遷移
+#define MODE_MAKING     6 // 問題自動作成中                      ※編集モード時遷移
+#define MODE_AUTO       7 // 解答探索中                          ※プレイモード時遷移
+#define MODE_MAKE_CLEAR 8 // クリアデータ作成中                  ※プレイモード時遷移
+
+// 失敗種類の定義
+#define FAILED_LOAD_FILE    1 // ファイル読み込み失敗
+#define FAILED_LOGIC        2 // 論理的矛盾発見
+#define FAILED_TIMEOUT      3 // タイムアウトで解答作成失敗
+#define FAILED_NOT_CLEAR    4 // クリア不可能で解答作成失敗
+#define FAILED_DOUBLE_CLEAR 5 // 複数解答ありで解答作成失敗
+#define FAILED_MAKE_PROBLEM 6 // 問題作成失敗
+
+// カーソルモードの定義
+#define CURSOR_ANSWER   1 // 解答用カーソル
+#define CURSOR_CANDIATE 2 // 候補用カーソル
+
+// チェック種類の定義
+#define CHECK_OFF    0 // チェックOFF
+#define CHECK_LOGIC  1 // 論理的矛盾でチェック
+#define CHECK_ANSWER 2 // 解答比較でチェック
+
+// ヒント２種類の定義
+#define HINT2_OFF    0 // 表示OFF
+#define HINT2_MANUAL 1 // 手動
+#define HINT2_AUTO   2 // 自動
+
+// ロジック適用可不可の定義
+#define LOGIC_OFF     0 // ロジック適用前
+#define LOGIC_ENABLE  1 // ロジック適用後適用可能
+#define LOGIC_DISABLE 2 // ロジック適用後適用不可
+
+#define SEARCH_STOP_CLEAR_COUNT               2 // 一定以上のクリアパターンを見つけると探索中止する
+#define SEARCH_STOP_NODE_COUNT            30000 // 一定以上のノード数で探索中止する
+#define SEARCH_STOP_NODE_COUNT_MODE_MAKING  600 // 一定以上のノード数で探索中止する(問題作成中)
+
+#define LIMIT_MAKE_STAGE 1000 // 自動問題作成時の試行する問題の数の上限
+#define LIMIT_LOGIC_LOOP   50 // ロジックTYPE_A,TYPE_Bを変化がなくなるまで繰り返すループ数のリミット
+#define SHUFFLE_COUNT     100 // ランダムナンバーリスト生成時に何回シャッフルするか
+
+// 解答発見時の発見タイプ
+#define FIND_TYPE_DEEP     0 // 簡単には解が見つからない場合
+#define FIND_TYPE_BOX      1 // 同じボックス内に1つのナンバーしか候補がない場合
+#define FIND_TYPE_HORIZON  2 // 同じ水平ライン内にに1つのナンバーしか候補がない場合
+#define FIND_TYPE_VERTICAL 3 // 同じ垂直ライン内に1つのナンバーしか候補がない場合
+#define FIND_TYPE_ONE_MASS 4 // 1マスに1つのナンバーしか候補がない場合
+#define FIND_TYPE_MAX      5 // 発見タイプの種類数
+
+/******************************************* 数独マスのデータ構造 **********************************************/
+// 2次元配列(x,y)座標のINT型(32bit)
+// 下位4bit 実際に入力されている数字(未入力は0の値)
+// 5bit目～13bit目 他のマスとの兼合いで絶対に入力できない使用済み数字のフラグが立つ
+// 5bit=1 6bit=2 7bit=3 8bit=4 9bit=5 10bit=6 11bit=7 12bit=8 13bit=9
+// 上位19bit 未使用(ゼロパディング)
+/***************************************************************************************************************/
+#define NUMBER_BIT   $000F // 実際に入力されている値を得るためのマスク
+#define ALL_USED_BIT $1FF0 // 1～10まで全ての数値が使用済みのフラグ
+#define USED_BIT     $0008 // 左シフト用使用済みフラグ 3を指定する時の例：USED_BIT<<3
+#define DEF_1_BIT    $1FE0 // 1が確定済みナンバー
+#define DEF_2_BIT    $1FD0 // 2が確定済みナンバー
+#define DEF_3_BIT    $1FB0 // 3が確定済みナンバー
+#define DEF_4_BIT    $1F70 // 4が確定済みナンバー
+#define DEF_5_BIT    $1EF0 // 5が確定済みナンバー
+#define DEF_6_BIT    $1DF0 // 6が確定済みナンバー
+#define DEF_7_BIT    $1BF0 // 7が確定済みナンバー
+#define DEF_8_BIT    $17F0 // 8が確定済みナンバー
+#define DEF_9_BIT    $0FF0 // 9が確定済みナンバー
+
+#define ctype getNumber(%1, %2)               (data(%1, %2)&NUMBER_BIT)                                                     // データから任意の座標のナンバー取得
+#define ctype getMoveNumber(%1, %2, %3)       (move_data(%1, %2, %3)&NUMBER_BIT)                                            // 履歴データから任意の座標のナンバー取得
+#define ctype getStartNumber(%1, %2)          (getMoveNumber(0, %1, %2))                                                    // 履歴データ先頭から任意の座標のナンバー取得
+#define ctype getSearchNumber(%1, %2, %3)     (search_data(%1, %2, %3)&NUMBER_BIT)                                          // 探索データから任意の座標のナンバー取得
+#define ctype getClearNumber(%1, %2)          (clear_data(%1, %2)&NUMBER_BIT)                                               // クリアデータから任意の座標のナンバー取得
+#define ctype getChangeBit(%1, %2, %3)        (data(%1, %2)^(data(%1, %2)|%3))                                              // 任意の座標を任意のフラグで更新する時、変更があるビットを取得する
+#define ctype isEntered(%1, %2)               (getNumber(%1, %2) > 0)                                                       // 任意の座標が入力済みかどうか
+#define ctype isStartEntered(%1, %2)          (getStartNumber(%1, %2) > 0)                                                  // 履歴データ先頭の任意の座標が入力済みかどうか
+#define ctype isClearEntered(%1, %2)          (getClearNumber(%1, %2) > 0)                                                  // クリアデータの任意の座標が入力済みかどうか
+#define ctype isNotEntered(%1, %2)            (getNumber(%1, %2) == 0)                                                      // 任意の座標が未入力かどうか
+#define ctype isNoneNumber(%1, %2)            (data(%1, %2) == ALL_USED_BIT)                                                // 任意の座標に入り得るナンバーが存在しない状態
+#define ctype isButting(%1, %2)               ( (data(%1, %2)&(USED_BIT<<getNumber(%1, %2))) != 0 )                         // 任意の座標のナンバーが他とバッティングしている状態
+#define ctype isPossible(%1, %2, %3)          ( isNotEntered(%1,%2) && ( (data(%1, %2)&(USED_BIT<<%3)) == 0 ) )             // 任意の座標に任意のナンバーが入力できるかどうか(入力済みマスの場合はFALSEが返る)
+#define ctype isPossibleNative(%1, %2, %3)    ( (data(%1, %2)&(USED_BIT<<%3)) == 0 )                                        // isPossibleとの違いは入力済みマスからでもナンバー候補の比較ができる
+#define ctype isPossibleInput(%1, %2, %3)     ( (move_input_used(move_count, %1, %2)&(USED_BIT<<%3)) == 0 )                 // 任意の座標が候補ナンバー予想されているか
+#define ctype isFalse(%1, %2)                 (isNoneNumber(%1, %2) || isButting(%1, %2))                                   // 任意の座標で矛盾しているかどうか
+#define ctype isClearFalse(%1, %2)            ( (getNumber(%1, %2) != 0) && (getNumber(%1, %2) != getClearNumber(%1, %2)) ) // 任意の座標でクリアデータと一致していない
+#define ctype isLogicFlag(%1, %2, %3)         ( ( node_logic_flag(%1, %2)&(1<<%3) ) != 0 )                                  // 解答用候補の任意の座標に任意のナンバーのヒント用ロジックフラグが立っているかどうか
+#define ctype isLogicFlagInput(%1, %2, %3)    ( ( node_logic_flag_input(%1, %2)&(1<<%3) ) != 0 )                            // 入力用候補の任意の座標に任意のナンバーのヒント用ロジックフラグが立っているかどうか
+#define ctype isDelete(%1, %2, %3)            ( ( node_delete_flag(%1, %2)&(USED_BIT<<%3) ) != 0 )                          // 解答用候補の任意の座標の任意のナンバーが直前で削除されたかどうか
+#define ctype isDeleteInput(%1, %2, %3)       ( ( node_delete_flag_input(%1, %2)&(USED_BIT<<%3) ) != 0 )                    // 入力用候補の任意の座標の任意のナンバーが直前で削除されたかどうか
+#define ctype isMouseArea(%1, %2, %3, %4)     ( (mousex >= %1) && (mousex < %1+%3) && (mousey >= %2) && (mousey < %2+%4) )  // マウス座標が任意のエリア内かどうかの判定(左X座標,上Y座標,幅,高さ)
+#define ctype changePossibleInput(%1, %2, %3) move_input_used(move_count, %1, %2) ^= USED_BIT<<%3                           // 任意の座標の任意の候補ナンバーをON-OFF切り替える
+#define ctype isMark(%1, %2)                  (mark_data(%1, %2) == 1)                                                      // 任意の座標のナンバーがマークされいるかどうか
+
+#define ctype BoxId(%1, %2)  (%1/3+%2/3*3) // x,y座標からボックスidを取得
+#define ctype ListId(%1, %2) (%1*9+%2-1)   // グループ種類idとナンバーnumからリストidを取得
+#define ctype PosX(%1)       (%1/9)        // x,y座標合成値からx座標を取得
+#define ctype PosY(%1)       (%1\9)        // x,y座標合成値からy座標を取得
+#define ctype XYPos(%1, %2)  (%1*9+%2)     // x,y座標からx,y座標合成値を取得
+
+#define ctype isPlayMode           (game_mode == MODE_PLAY)      // プレイモード
+#define ctype isNotPlayMode        (game_mode != MODE_PLAY)      // プレイモードではない
+#define ctype isEditMode           (game_mode == MODE_EDIT)      // 編集モード
+#define ctype isNotEditMode        (game_mode != MODE_EDIT)      // 編集モードではない
+#define ctype isMaking             (game_mode == MODE_MAKING)    // 作成中
+#define ctype isNotMaking          (game_mode != MODE_MAKING)    // 作成中ではない
+#define ctype isClear              (game_mode == MODE_CLEAR)     // クリア状態
+#define ctype isNotClear           (game_mode == MODE_NOT_CLEAR) // クリア失敗状態
+#define ctype isFullModeClear      ( (move_count > 0) && (isClear() || isNotClear()) ) // 全マス入力時モードクリア条件
+#define ctype isSearchingMode      ( (game_mode == MODE_AUTO) || (game_mode == MODE_MAKING) || (game_mode == MODE_MAKE_CLEAR) ) // 探索中モード
+#define ctype isNotSearchingMode   ( (game_mode != MODE_AUTO) && (game_mode != MODE_MAKING) && (game_mode != MODE_MAKE_CLEAR) ) // 探索停止中モード
+
+#define ctype isAllTypeNoChanged   ( (bChangedTypeA == 0) && (bChangedTypeB == 0) ) // 全てのロジックを試して更新がなくなったかどうか
+
+#define ctype isBoxColorRed      ( (box_cnt+horizon_cnt+vertical_cnt+one_mass_cnt == 1) && (box_cnt == 1) )      // AI回答時、解法ボックスが用いられている
+#define ctype isHorizonColorRed  ( (box_cnt+horizon_cnt+vertical_cnt+one_mass_cnt == 1) && (horizon_cnt == 1) )  // AI回答時、解法横ラインが用いられている
+#define ctype isVerticalColorRed ( (box_cnt+horizon_cnt+vertical_cnt+one_mass_cnt == 1) && (vertical_cnt == 1) ) // AI回答時、解法縦ラインが用いられている
+#define ctype isOneMassColorRed  ( (box_cnt+horizon_cnt+vertical_cnt+one_mass_cnt == 1) && (one_mass_cnt == 1) ) // AI回答時、解法1マスが用いられている
+
+*Init
+	// ウィンドウ作成
+	title STRING_TITLE_NAME
+	screen 0, WINDOW_W, WINDOW_H
+	
+	/************************************************************* 変数初期化 ******************************************************************/
+	dim data, 9, 9               // 盤面データ
+	dim mem_data, 9, 9           // 一時保存用データ
+	dim mark_data, 9, 9          // マーク用データ
+	dim answer_find_type_cnt, FIND_TYPE_MAX // クリア解までの１つ１つの解発見時に使用された発見タイプ別の総数
+	dim node_delete_flag, 9, 9              // ノード単位の解答用削除フラグ初期化
+	dim node_logic_flag, 9, 9               // ノード単位の解答用ロジック強調フラグ初期化
+	dim node_delete_flag_input, 9, 9        // ノード単位の入力用削除フラグ初期化
+	dim node_logic_flag_input, 9, 9         // ノード単位の入力用ロジック強調フラグ初期化
+	InitMoveData                 // 履歴盤面データ初期化処理
+	game_mode = MODE_EDIT        // 編集モードで開始
+	failed_type = 0              // 失敗のタイプ
+	iCurMode = CURSOR_ANSWER     // カーソルモード初期化
+	point_up_number = 0          // カーソルが合っている強調表示するナンバー
+	bLockICursor = 0             // 入力カーソルをロックするフラグ
+	bLeftClickHold = 0           // 前回処理の更新時の左クリックホールド状態
+	bRightClickHold = 0          // 前回処理の更新時の右クリックホールド状態
+	bKeyHold = 0                 // 前回処理の更新時のキーホールド状態
+	bAnalyze = 1                 // 解析結果表示フラグ
+	bDispHint1 = 1               // ヒント１表示フラグ
+	iDispHint2 = HINT2_MANUAL    // ヒント２表示モード(0=表示なし 1=手動 2=自動)	
+	bDispAnswer = 0              // 答え表示フラグ
+	iDispCheckMode = CHECK_LOGIC // チェック表示モード(0=表示なし 1=論理矛盾チェック 2=答えと比較)
+	iLevel = 1                   // 問題作成用難易度
+	iLogicType = LOGIC_DEFAULT   // 候補適用用ロジックタイプ
+	iLogicEnable = LOGIC_OFF     // ロジック適用可不可タイプ
+	
+	// カーソルキー受付無効用変数
+	dim iCurAccept,   4 // 1次受付上下左右キー、2次受付上下左右キーの8種類のイベント遷移
+	dim iCurRejectT1, 4 // 1次イベント開始からの経過時間
+	dim iCurRejectT2, 4 // 2次イベント開始からの経過時間
+	
+	// メインループカウンタ※オーバーフローを考慮した設計
+	iMainLoopCount = 0
+	/********************************************************************************************************************************************/
+
+	randomize // 乱数初期化処理(Windowsタイムで初期化)
+
+// メインループ
+*Main_Loop
+	while 1
+		KeyMouseInput // キー、マウス入力処理
+		Display       // 画面出力処理
+		await LOOP_EVENT_TIME // CPU使用せずに一定時間待機処理
+		iMainLoopCount++ // メインループカウンタインクリメント
+	wend
+	stop
+
+// プレイモードに変更
+#deffunc ModeChangePlay
+	switch game_mode
+		case MODE_MAKING     // (編集モード時)問題自動作成中
+		case MODE_AUTO　     // (解析モード時)解答探索中
+		case MODE_MAKE_CLEAR // (プレイモード時)クリアデータ作成中
+		case MODE_CLEAR      // (プレイモード時)問題クリア成功
+		case MODE_NOT_CLEAR  // (プレイモード時)問題クリア失敗
+			return
+		case MODE_PLAY       // プレイモード
+			failed_type = 0       // 失敗状態初期化
+			game_mode = MODE_PLAY
+			return
+		case MODE_EDIT       // 編集モード
+			failed_type = 0       // 失敗状態初期化
+			InitMoveData          // 編集モードで作成したデータを固定データ(履歴INDEX=0)とする
+			dmy = MakeClearData() // クリアデータ作成
+			game_mode = MODE_PLAY
+			return
+	swend
+	return
+
+// 編集モードに変更
+#deffunc ModeChangeEdit
+	switch game_mode
+		case MODE_EDIT       // 編集モード
+		case MODE_MAKING     // (編集モード時)問題自動作成中
+		case MODE_AUTO　     // (解析モード時)解答探索中
+		case MODE_MAKE_CLEAR // (プレイモード時)クリアデータ作成中
+			return
+		case MODE_PLAY       // プレイモード
+		case MODE_CLEAR      // (プレイモード時)問題クリア成功
+		case MODE_NOT_CLEAR  // (プレイモード時)問題クリア失敗
+			// 処理続行確認ダイアログ
+			dialog STRING_MESSAGE_EDIT, 3
+			if stat != 6 : return // 「はい」以外なら処理中止
+			// 失敗状態初期化
+			failed_type = 0
+			game_mode = MODE_EDIT
+			InitMoveData // プレイモード及び解析モードの履歴データは削除される			
+			return
+	swend
+	return
+
+// 問題自動作成
+#deffunc MakeSudoku
+	switch game_mode
+		case MODE_PLAY       // プレイモード
+		case MODE_MAKING     // (編集モード時)問題自動作成中
+		case MODE_AUTO　     // (解析モード時)解答探索中
+		case MODE_MAKE_CLEAR // (プレイモード時)クリアデータ作成中
+		case MODE_CLEAR      // (プレイモード時)問題クリア成功
+		case MODE_NOT_CLEAR  // (プレイモード時)問題クリア失敗
+			return
+		case MODE_EDIT       // 編集モード
+			// 処理続行確認ダイアログ
+			dialog STRING_MESSAGE_MAKE, 3
+			if stat != 6 : return // 「はい」以外なら処理中止
+			// 失敗状態初期化
+			failed_type = 0
+			game_mode = MODE_MAKING
+			ret = MakeData()
+			game_mode = MODE_EDIT
+			if ret == 1 : ModeChangePlay
+			return
+	swend
+	return
+
+// 盤面クリア
+#deffunc NewSudoku
+	switch game_mode
+		case MODE_PLAY       // プレイモード
+		case MODE_MAKING     // (編集モード時)問題自動作成中
+		case MODE_AUTO　     // (解析モード時)解答探索中
+		case MODE_MAKE_CLEAR // (プレイモード時)クリアデータ作成中
+		case MODE_CLEAR      // (プレイモード時)問題クリア成功
+		case MODE_NOT_CLEAR  // (プレイモード時)問題クリア失敗
+			return
+		case MODE_EDIT       // 編集モード
+			// 処理続行確認ダイアログ
+			dialog STRING_MESSAGE_NEW, 3
+			if stat != 6 : return // 「はい」以外なら処理中止
+			// 失敗状態初期化
+			failed_type = 0
+			dim data, 9, 9 // 盤面データ
+			InitMoveData // 固定データ(履歴INDEX=0)を削除する
+			return
+	swend
+	return
+
+// 自動解答入力
+#deffunc AutoSudoku
+	if isNotPlayMode() : return
+	game_mode = MODE_AUTO
+	// 失敗状態初期化
+	failed_type = 0	
+	SearchAnswer
+	return
+
+// 解析結果表示 ON-OFF
+#deffunc AnalyzeSudoku
+	if bAnalyze { bAnalyze = 0 }
+	else        { bAnalyze = 1 }
+	return
+	
+// 解答表示 ON-OFF
+#deffunc AnswerSudoku
+	if bDispAnswer { bDispAnswer = 0 }
+	else           { bDispAnswer = 1 }
+	return
+
+// チェック表示 ON(論理)-ON(解答)-OFF
+#deffunc CheckSudoku
+	if        iDispCheckMode == CHECK_OFF    { iDispCheckMode = CHECK_LOGIC }
+	else : if iDispCheckMode == CHECK_LOGIC  { iDispCheckMode = CHECK_ANSWER }
+	else : if iDispCheckMode == CHECK_ANSWER { iDispCheckMode = CHECK_OFF }
+	return
+
+// ヒント１表示 ON-OFF
+#deffunc Hint1Sudoku
+	if bDispHint1 { bDispHint1 = 0 }
+	else          { bDispHint1 = 1 }
+	return
+
+// ヒント２表示 ON-OFF
+#deffunc Hint2Sudoku
+	if iDispHint2 == HINT2_OFF           { iDispHint2 = HINT2_MANUAL }
+	else : if iDispHint2 == HINT2_MANUAL { iDispHint2 = HINT2_AUTO }
+	else : if iDispHint2 == HINT2_AUTO   { iDispHint2 = HINT2_OFF }
+	if iDispHint2 != HINT2_MANUAL : iCurMode = CURSOR_ANSWER
+	return
+
+// ロジックタイプ前へ
+#deffunc BackLogicType
+	iLogicType--
+	if iLogicType < 0  : iLogicType = 26
+	iLogicEnable = LOGIC_OFF
+	return
+
+// ロジックタイプ次へ
+#deffunc NextLogicType
+	iLogicType++
+	if iLogicType > 26 : iLogicType = 0
+	iLogicEnable = LOGIC_OFF
+	return
+	
+// ロジックでヒント２表示更新
+#deffunc LogicSudoku
+	if iDispHint2 != HINT2_MANUAL : return
+	// 手動用フラグ初期化
+	dim node_delete_flag_input, 9, 9 // ノード単位の削除フラグ初期化
+	dim node_logic_flag_input, 9, 9  // ノード単位のロジック強調フラグ初期化
+	//////////////////////////////// 自動用フラグを保存 //////////////////////////////////////
+	dim mem_delete_flag, 9, 9
+	dim mem_logic_flag, 9, 9
+	for x, 0, 9
+		for y, 0, 9
+			mem_delete_flag(x, y) = node_delete_flag(x, y)
+			mem_logic_flag(x, y) = node_logic_flag(x, y)
+		next
+	next
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// 自動用フラグ初期化
+	dim node_delete_flag, 9, 9 // ノード単位の削除フラグ初期化
+	dim node_logic_flag, 9, 9  // ノード単位のロジック強調フラグ初期化		
+	// 作業用フラグ初期化
+	dim delete_flag, 9, 9 // ノード単位の削除フラグ初期化
+	dim logic_flag, 9, 9  // ノード単位のロジック強調フラグ初期化
+	// 作業用データ保存
+	SaveData
+	////////////////////////// 作業用データのフラグを手動用フラグに入れ替え ////////////////////////////
+	for x, 0, 9
+		for y, 0, 9
+			data(x, y) &= NUMBER_BIT
+			data(x, y) |= move_input_used(move_count, x, y)
+		next
+	next
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ロジックデータ作成
+	NewLogicData	
+	switch iLogicType
+		case LOGIC_CLEAR
+			ClearUsedData
+			swbreak
+		case LOGIC_DEFAULT
+			InitUsedData
+			swbreak
+		case LOGIC_LOCKED_1
+			LogicLocked1
+			swbreak
+		case LOGIC_LOCKED_2
+			LogicLocked2
+			swbreak
+		case LOGIC_NAKED_PAIRS
+			LogicRenewUsedTypeB
+			swbreak
+		case LOGIC_NAKED_TRIPLETS
+			LogicRenewUsedTypeB
+			swbreak
+	swend
+	// 削除フラグの通り候補削除
+	dmy = DeleteFlagData()
+	// ロジックデータ解放
+	CloseLogicData
+	// ロジック適用可不可判定のため変更ありフラグ初期化
+	bChanged = 0
+	//////////////////////// 手動用フラグを作業用データのフラグに入れ替え ///////////////////////	
+	for x, 0, 9
+		for y, 0, 9
+			if iLogicType == LOGIC_CLEAR {				
+				move_input_used(move_count, x, y) = data(x, y) 
+			}
+			else {
+				node_logic_flag_input(x, y) = node_logic_flag(x, y)
+				if isEntered(x, y) : _continue
+				if move_input_used(move_count, x, y) == (move_input_used(move_count, x, y) | data(x, y)) : _continue
+				bChanged = 1
+				move_input_used(move_count, x, y) |= data(x, y)
+				node_delete_flag_input(x, y) = node_delete_flag(x, y)
+			}
+			// 保存した自動用フラグを読み込み
+			node_delete_flag(x, y) = mem_delete_flag(x, y)
+			node_logic_flag(x, y) = mem_logic_flag(x, y)
+		next
+	next
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// データ変更ありならロジック適用可と判断
+	if iLogicType != LOGIC_CLEAR {
+		if bChanged == 1 { iLogicEnable = LOGIC_ENABLE }
+		else             { iLogicEnable = LOGIC_DISABLE }
+	}
+	// 作業用データ読み込み
+	LoadData
+	return
+
+// 一つ先に移動
+#deffunc MoveNext
+	if isNotPlayMode() : return
+	if move_count == move_max_count : return
+	if move_count < MOVE_MAX : move_count++
+	LoadMoveData
+	return
+
+// 一つ前に移動
+#deffunc MoveBack
+	if isFullModeClear() : game_mode = MODE_PLAY
+	if isNotPlayMode() : return	
+	if move_count == 0 : return
+	move_count--
+	LoadMoveData
+	return
+
+// 最初に移動
+#deffunc MoveBegin
+	if isFullModeClear() : game_mode = MODE_PLAY
+	if isNotPlayMode() : return	
+	move_count = 0
+	LoadMoveData
+	return
+
+// 最後に移動
+#deffunc MoveEnd
+	if isNotPlayMode() : return
+	move_count = move_max_count
+	LoadMoveData
+	return
+
+// 特定箇所のマークフラグをON-OFFする
+#deffunc MarkSudoku
+	mark_data(cur_x, cur_y)^=1
+	return
+
+// ボタンからナンバー入力
+#deffunc PressNumber int press_number
+	if iCurMode == CURSOR_CANDIATE { // 候補ナンバー入力モード
+		if press_number == 0 { move_input_used(move_count, cur_x, cur_y) = ALL_USED_BIT } // 削除キーが押された場合は全候補消去する
+		else                 { changePossibleInput(cur_x, cur_y, press_number) } // キー入力で候補をON-OFF
+	}
+	else { // 通常入力モード
+		InputNumber cur_x, cur_y, press_number
+	}
+	return
+
+/************************************************************** セーブファイル構造 ********************************************************************/
+// ファイルはテキスト形式(文字コードSHIFT-JIS)
+// -----------------------------------------------------------------------------------------------------------------
+//    1～9行目：盤面データは9行9列の0～9(0は未入力マス)の文字として保存(※ナンバーのみでフラグ情報は保存しない)
+// ----------------------------- 履歴データ０ならばマークデータを省略可能 ------------------------------------------
+//      10行目：空データ
+//  11～19行目：マークデータ　　　　　　　　　9行9列の0か1の数値の文字
+// ---------------------------- これより下の行は履歴データ０として省略可能 -----------------------------------------
+//      20行目：履歴データの数　              数値の文字列(0～履歴数最大値)
+//      21行目：履歴データの現在インデックス　数値の文字列(0～履歴数最大値)
+//  22～30行目：INDEX=0の盤面履歴データ       9行9列の0～9の数値の文字
+//  31～39行目：INDEX=0の候補入力データ       9行4*9-1列の0～9の数値の文字(1行の例： 12,278,  0,  6,  0,  0,120, 24, 11)※候補フラグを3桁の整数に変換
+//      40行目：INDEX=0の入力マスのx座標      文字列"-1"(※初期配置(INDEX=0)の入力マスの座標はダミーなので読み込み時に捨てられるデータ)
+//      41行目：INDEX=0の入力マスのy座標      文字列"-1"(※初期配置(INDEX=0)の入力マスの座標はダミーなので読み込み時に捨てられるデータ)
+//  42～50行目：INDEX=1の盤面履歴データ       9行9列の0～9の数値の文字
+//  51～59行目：INDEX=1の候補入力データ       9行4*9-1列の0～9の数値の文字(1行の例： 12,278,  0,  6,  0,  0,120, 24, 11)※候補フラグを3桁の整数に変換
+//      60行目：INDEX=1の入力マスのx座標      0～8の数値の文字
+//      61行目：INDEX=1の入力マスのy座標      0～8の数値の文字
+//      ・・・
+// 22+N*20行目：INDEX=Nの盤面データ           9行9列の0～9の数値の文字
+// 31+N*20行目：INDEX=Nの候補入力データ       9行4*9-1列の0～9の数値の文字(1行の例： 12,278,  0,  6,  0,  0,120, 24, 11)※候補フラグを3桁の整数に変換
+// 40+N*20行目：INDEX=Nの入力マスのx座標      0～8の数値の文字
+// 41+N*20行目：INDEX=Nの入力マスのy座標      0～8の数値の文字
+//      ・・・
+// ------------------------------------------------------------------------------------------------------------------
+// ※履歴データは存在するデータのみ書き込み、メモリ上の全てを保存する必要はない
+// ※行毎にデータをセパレートしているので行数を変更することはできないが、1行のデータ部の後ろの部分に関してはコメント等を記載しても影響はない
+/*******************************************************************************************************************************************************/
+// セーブ開始
+#deffunc SaveSudoku
+	dialog "txt", 17
+	if stat = 0 : return
+	filepath = refstr
+	save_buf = ""	
+	notesel save_buf
+
+	// 現在データ書き込み
+	for y, 0, 9
+		str_buf = ""
+		for x, 0, 9
+			if isEntered(x, y) { str_buf += str(getNumber(x, y)) }
+			else               { str_buf += "0" }
+		next
+		if y==0 : str_buf += " // data"
+		noteadd str_buf // 1行書き込み
+	next
+
+	noteadd "" // 空データ書き込み
+	
+	// マークデータ書き込み
+	for y, 0, 9
+		str_buf = ""
+		for x, 0, 9
+			if isMark(x, y) { str_buf += "1" }
+			else            { str_buf += "0" }
+		next
+		if y==0 : str_buf += " // mark"
+		noteadd str_buf // 1行書き込み
+	next
+
+	if move_max_count > 0 { // 履歴データがあれば書き込む(なければ省略可能)
+		// 履歴データの数を書き込み
+		noteadd str(move_max_count) + " // max" // 1行書き込み
+		// 履歴データの現在インデックス書き込み
+		noteadd str(move_count) + " // index" // 1行書き込み
+	
+		// 履歴データ書き込み
+		for i, 0, move_max_count + 1
+			// 盤面データ書き込み
+			for y, 0, 9
+				str_buf = ""
+				for x, 0, 9
+					num = getMoveNumber(i, x, y)
+					if num == 0 { str_buf += "0" }
+					else        { str_buf += str(num) }
+				next
+				if y == 0 : str_buf += " // " + str(i)
+				noteadd str_buf // 1行書き込み
+			next
+			// 入力候補データ書き込み
+			for y, 0, 9
+				str_buf = ""
+				for x, 0, 9
+					num = move_input_used(i, x, y)>>4
+					if num < 10         { str_buf += "  "+str(num) }
+					else : if num < 100 { str_buf += " "+str(num) }
+					else                { str_buf += str(num) }
+					if x!=8 : str_buf += ","
+				next
+				noteadd str_buf // 1行書き込み
+			next			
+			// 入力履歴の座標を書き込み
+			noteadd str(str(move_answer_px(i)) + " // px") // 1行書き込み
+			noteadd str(str(move_answer_py(i)) + " // py") // 1行書き込み
+		next
+	}
+
+	if isTextFile() == 0 : filepath += ".txt"
+	notesave filepath
+	
+	stage_name = getFileName()
+	
+	return
+
+// ファイル名の拡張子.txtを判定
+#defcfunc isTextFile
+	len = strlen(filepath)
+	if len < 5 : return 0
+	if (peek(filepath, len-1) != 't') && (peek(filepath, len-1) != 'T') : return 0
+	if (peek(filepath, len-2) != 'x') && (peek(filepath, len-2) != 'X') : return 0
+	if (peek(filepath, len-3) != 't') && (peek(filepath, len-3) != 'T') : return 0
+	if (peek(filepath, len-4) != '.')                                   : return 0
+	return 1
+
+// フルパスファイル名からパスを削除したファイル名だけを取得する
+#defcfunc getFileName
+	len = strlen(filepath)
+	for i, len-1, -1, -1
+		if peek(filepath, i) == '\\' : _break
+	next
+	return strmid(filepath, i+1, len-(i+1))
+	
+// ロード開始
+#deffunc LoadSudoku
+	dialog "txt", 16
+	if stat = 0 : return
+	filepath = refstr
+	exist filepath
+	if strsize == -1 {
+		failed_type = FAILED_LOAD_FILE
+		return
+	}
+	load_buf = ""	
+	notesel load_buf
+	noteload filepath
+
+	dim mark_data, 9, 9 // マークデータを初期化
+	InitMoveData        // 履歴データを初期化
+// 22+N*20行目：INDEX=Nの盤面データ           9行9列の0～9の数値の文字
+// 31+N*20行目：INDEX=Nの候補入力データ       9行4*9-1列の0～9の数値の文字(1行の例： 12,278,  0,  6,  0,  0,120, 24, 11)※候補フラグを3桁の整数に変換
+// 40+N*20行目：INDEX=Nの入力マスのx座標      0～8の数値の文字
+// 41+N*20行目：INDEX=Nの入力マスのy座標      0～8の数値の文字
+
+	for i, 0, notemax
+		noteget str_buf, i // ファイルを1行ずつ読み込む ※改行コードは含まれない
+		len = strlen(str_buf) // 1行の文字数取得 ※1バイト単位
+		idx = (i-21)/20 // 履歴データのインデックス(1行目はidx=-1となるので注意)
+		i0 = 21+idx*20 // 履歴データの先頭行
+		if i < 9 {             // 現データ行(9行分)
+			if len < 9 : _break // データ異常
+			for p, 0, 9
+				num = peek(str_buf, p)-'0'
+				if (num < 0) || (num > 9) : _break // データ異常
+				data(p, i) = num
+			next
+		}
+		else : if i == 9 { }   // 空データ
+		else : if i < 19 {     // マークデータ行(9行分)
+			if len < 9 : _break // データ異常
+			for p, 0, 9
+				num = peek(str_buf, p)-'0'
+				if (num < 0) || (num > 1) : _break // データ異常
+				mark_data(p, i-10) = num
+			next			
+		}
+		else : if i == 19 {    // 履歴データ数の行
+			if int(str_buf) >= MOVE_MAX : _break // データ異常
+			move_max_count = int(str_buf) // int関数の仕様により先頭の数字文字列のみ変換される
+		}
+		else : if i == 20 {    // 履歴データインデックスの行
+			if int(str_buf) > move_max_count : _break // データ異常
+			move_count = int(str_buf) // int関数の仕様により先頭の数字文字列のみ変換される
+		}
+		else : if i < i0+9 {   // 履歴データの行(9行分)　※idx=-1の場合はこの処理は行われない
+			if len < 9 : _break // データ異常
+			for p, 0, 9
+				num = peek(str_buf, p)-'0'
+				if (num < 0) || (num > 9) : _break // データ異常
+				move_data(idx, p, i-i0) = num
+			next
+		}
+		else : if i < i0+9+9 {   // 候補データの行(9行分)　※idx=-1の場合はこの処理は行われない
+			if len < 4*9-1 : _break // データ異常
+			for p, 0, 9
+				num = int(strmid(str_buf, p*4, 3))
+				if (num < 0) || (num > 511) : _break // データ異常
+				move_input_used(idx, p, i-i0-9) = num<<4
+			next
+		}
+		else : if i == i0+9+9 {  // 入力座標(x)履歴の行　※idx=-1の場合はこの処理は行われない
+			if idx > 0 {
+				if (int(str_buf) < 0) || (int(str_buf) > 8) : _break // データ異常
+				move_answer_px(idx) = int(str_buf) // int関数の仕様により先頭の数字文字列のみ変換される
+			}
+		}
+		else : if i == i0+9+9+1 { // 入力座標(y)履歴の行　※idx=-1の場合はこの処理は行われない
+			if idx > 0 {
+				if (int(str_buf) < 0) || (int(str_buf) > 8) : _break // データ異常
+				move_answer_py(idx) = int(str_buf) // int関数の仕様により先頭の数字文字列のみ変換される
+			}
+		}
+	next
+	if (notemax < 9) || (i != notemax) { // データ異常により読み込み失敗
+		failed_type = FAILED_LOAD_FILE
+		dim data, 9, 9      // 盤面データクリア
+		dim mark_data, 9, 9 // マークデータクリア
+		InitMoveData        // 履歴データクリア
+		return
+	}
+	if move_max_count == 0 : SaveMoveData
+	InitUsedData
+	answer_px = move_answer_px(move_count)
+	answer_py = move_answer_py(move_count)
+	mem_move_count = move_count
+	move_count = 0
+	dmy = MakeClearData()
+	move_count = mem_move_count
+	game_mode = MODE_PLAY
+	stage_name = getFileName()
+	return
+	
+// データを一時保存
+#deffunc SaveData
+	for x, 0, 9
+		for y, 0, 9
+			mem_data(x, y) = data(x, y)
+		next
+	next
+	return
+
+// 一時保存データをリストア
+#deffunc LoadData
+	for x, 0, 9
+		for y, 0, 9
+			data(x, y) = mem_data(x, y)
+		next
+	next
+//	InitUsedData // 使用済みデータの初期化
+	return
+
+// 履歴データに現データを保存
+#deffunc SaveMoveData
+	for x, 0, 9
+		for y, 0, 9
+			move_data(move_count, x, y) = data(x, y)
+		next
+	next
+	move_answer_px(move_count) = answer_px
+	move_answer_py(move_count) = answer_py
+	return
+
+// 現データに履歴データを読み込む
+#deffunc LoadMoveData
+	for x, 0, 9
+		for y, 0, 9
+			data(x, y) = move_data(move_count, x, y)
+		next
+	next
+	InitUsedData // 使用済みデータの初期化
+	answer_px = move_answer_px(move_count)
+	answer_py = move_answer_py(move_count)
+	// 失敗状態初期化
+	failed_type = 0	
+	return
+
+// 現データに固定データ(履歴データの始めINDEX=0)を読み込む
+#deffunc LoadFixedData
+	for x, 0, 9
+		for y, 0, 9
+			data(x, y) = move_data(0, x, y)
+		next
+	next
+	InitUsedData // 使用済みデータの初期化
+	return
+
+// クリア状態のデータをクリアデータとして保存
+#deffunc SaveClearData
+	for x, 0, 9
+		for y, 0, 9
+			clear_data(x, y) = data(x, y)
+		next
+	next
+	return
+	
+// 探索データに現データを保存
+#deffunc SaveSearchData
+	for x, 0, 9
+		for y, 0, 9
+			search_data(search_depth, x, y) = data(x, y)
+		next
+	next
+	return
+
+// 現データに探索データを読み込み
+#deffunc LoadSearchData
+	for x, 0, 9
+		for y, 0, 9
+			data(x, y) = search_data(search_depth, x, y)
+		next
+	next
+	return
+
+// 履歴データ初期化
+#deffunc InitMoveData
+	stage_name = ""                     // ステージ名(ファイル名や自動作成問題名)
+	dim move_data, MOVE_MAX, 9, 9       // 盤面データ履歴
+	dim move_answer_px, MOVE_MAX        // 最終手履歴
+	dim move_answer_py, MOVE_MAX        // 最終手履歴
+	dim move_input_used, MOVE_MAX, 9, 9 // 入力用使用済みナンバーフラグ履歴
+	dim clear_data, 9, 9                // 固定データ(履歴INDEX=0)を問題とした場合のクリアデータ
+	move_count = 0                      // 履歴インデックス
+	move_max_count = 0                  // 履歴インデックスの上限(=履歴総数-1)
+	answer_px = -1                      // 最終入力X座標
+	answer_py = -1                      // 最終入力Y座標
+	InitUsedData // ナンバーデータより各マス上で使用できないナンバーのフラグを更新する
+	SaveMoveData // ワーキングデータを固定(問題)データ(履歴INDEX=0)とする
+	return
+
+// 探索データ初期化処理
+#deffunc InitSearch
+	dim search_data, 81, 9, 9   // ノードの深さ毎の探索データ(※現在探査しているデータのみ。分岐すると上書きされる)
+	dim search_num, 81, 9       // 総当たりノード生成時の各ナンバー
+	dim search_px, 81, 9        // 総当たりノード生成時の各X座標
+	dim search_py, 81, 9        // 総当たりノード生成時の各Y座標
+	dim search_index, 81        // 総当たりノードの現在地
+	dim search_index_max, 81    // 総当たりノードの深さ毎の総数
+	dim search_answer_index, 81 // クリアへ至る各層毎の正しいノードの記録
+	dim search_find_type, 81    // ノード毎の解発見タイプ
+	dim search_find_step_locked1, 81 // ノード毎の解発見時のロジック「ロックされた候補1」のステップ数
+	dim search_find_step_locked2, 81 // ノード毎の解発見時のロジック「ロックされた候補2」のステップ数
+	dim search_find_step_naked2, 81  // ノード毎の解発見時のロジック「2国同盟」のステップ数
+	dim search_find_step_naked3, 81  // ノード毎の解発見時のロジック「3国同盟」のステップ数
+	dim search_logic_type, 81   // ノードの深さ毎の解を導いたロジックタイプ
+	search_depth = 0            // リアルタイムのノード深度
+	search_node_cnt = 0         // 探索総ノード数
+	search_clear_cnt = 0        // 探索時のクリア回数
+	dim answer_find_type_cnt, FIND_TYPE_MAX // クリア解までの１つ１つの解発見時に使用された発見タイプ別の総数
+	answer_find_logic_locked1_cnt = 0       // クリア解までにロジック「ロックされた候補1」を何度使用したか
+	answer_find_logic_locked2_cnt = 0       // クリア解までにロジック「ロックされた候補2」を何度使用したか
+	answer_find_logic_naked2_cnt = 0        // クリア解までにロジック「2国同盟」を何度使用したか
+	answer_find_logic_naked3_cnt = 0        // クリア解までにロジック「3国同盟」を何度使用したか
+	answer_find_step_locked1_avg = 0        // クリア解までに使用したロジック「ロックされた候補1」の平均ステップ数
+	answer_find_step_locked2_avg = 0        // クリア解までに使用したロジック「ロックされた候補2」の平均ステップ数
+	answer_find_step_naked2_avg = 0         // クリア解までに使用したロジック「2国同盟」の平均ステップ数
+	answer_find_step_naked3_avg = 0         // クリア解までに使用したロジック「3国同盟」の平均ステップ数
+	answer_find_step_locked1_max = 0        // クリア解までに使用したロジック「ロックされた候補1」の最大ステップ数
+	answer_find_step_locked2_max = 0        // クリア解までに使用したロジック「ロックされた候補2」の最大ステップ数
+	answer_find_step_naked2_max = 0         // クリア解までに使用したロジック「2国同盟」の最大ステップ数
+	answer_find_step_naked3_max = 0         // クリア解までに使用したロジック「3国同盟」の最大ステップ数
+	answer_candiate_cnt = 1                 // クリア解を見つけるまでの、おおよその総分岐数(難易度に影響)
+	answer_logic_type = 0                   // 解を導いたロジックタイプ
+	answer_depth = 0                        // クリア解までの深さ
+	return
+
+// 候補の中からランダムに1手入力する(※未使用関数)
+#deffunc RandomInput
+	dim list_x, 81
+	dim list_y, 81
+	list_max = 0
+	for x, 0, 9
+		for y, 0, 9
+			if isEntered(x, y) : _continue
+			if isFalse(x, y) : return
+			list_x(list_max) = x
+			list_y(list_max) = y
+			list_max++
+		next
+	next
+	if list_max == 0 : return
+	idx = rnd(list_max)
+	x = list_x(idx)
+	y = list_y(idx)
+	dim list_num, 9
+	list_max = 0
+	for i, 0, 9
+		if isPossible(x, y, i+1) {
+			list_num(list_max) = i+1
+			list_max++
+		}
+	next
+	if list_max == 0 : return
+	idx = rnd(list_max)
+	num = list_num(idx)
+	InputNumber x, y, num
+	return
+
+// 問題自動作成処理
+#defcfunc MakeData
+	if isFalseCheck() {
+		failed_type = FAILED_LOGIC
+		return 0
+	}
+	if isFullInput() : failed_type = FAILED_MAKE_PROBLEM : return 0
+	SaveData
+	for make_cnt, 0, LIMIT_MAKE_STAGE
+		LoadData
+		InitUsedData // 使用済みデータの初期化
+		InitMoveData // 前提データを固定データ(履歴INDEX=0)とする
+		for add_cnt, 0, 80
+			InitSearch
+			ret = Search()
+			if search_node_cnt >= SEARCH_STOP_NODE_COUNT_MODE_MAKING : _break // ノード数上限なら問題を作り直す
+			if ret == 0 : _break // クリア不可能なら最初から作り直す
+			if ret == 1 { // クリア手順１つのみで問題として成立
+				if isPassStage() == 0 : _break // 問題レベルが不適合なら最初から作り直す
+				InitMoveData // 作成した問題データを固定データ(履歴INDEX=0)とする
+				return 1
+			}
+			// 複数解答へと分岐している最深ノードを確定させる
+			// ワーキングデータとして作成途中の固定データ(深度=0)を読み込む
+			depth = search_depth
+			search_depth = 0
+			LoadSearchData
+			for i_max, 0, depth
+				if search_answer_index(i_max) != search_index(i_max) : _break // クリア分岐しているノードの深さを取得
+			next
+			// 複数解の共有ノードを入力し、分岐ノードを確定させる
+			for i, 0, i_max+1
+				if search_index_max(i) == 0 : _continue
+				x = search_px(i, search_index(i))
+				y = search_py(i, search_index(i))
+				num = search_num(i, search_index(i))
+				InputNumber x, y, num
+			next
+			Display
+		next
+//		wait(100)		
+		if (search_node_cnt < SEARCH_STOP_NODE_COUNT_MODE_MAKING) && (add_cnt == 0) {
+			dim data, 9, 9 // 盤面データ
+			SaveData
+		}
+	next
+	dim data, 9, 9 // 盤面データ
+	InitMoveData // 固定データ(履歴INDEX=0)を削除する
+	return 0
+
+// 問題が設定された難易度かどうか
+// LEVEL1=1 LEVEL2=3 LEVEL3=5 LEVEL4=10 LEVE5=20 LEVEL6=_4
+#defcfunc isPassStage
+	switch iLevel
+		case 1
+			if (answer_candiate_cnt == 1) && (answer_find_logic_naked2_cnt == 0) && (answer_find_logic_locked2_cnt == 0) && (answer_find_logic_locked1_cnt == 0) {
+				if answer_find_type_cnt(FIND_TYPE_HORIZON) == 0 && answer_find_type_cnt(FIND_TYPE_VERTICAL) == 0 && answer_find_type_cnt(FIND_TYPE_ONE_MASS) == 0 {				
+					stage_name = "自動作成問題Lv1"
+					return 1
+				}
+			}
+			swbreak
+		case 2
+			if (answer_candiate_cnt == 1) && (answer_find_logic_naked2_cnt == 0) && (answer_find_logic_locked2_cnt == 0) && (answer_find_logic_locked1_cnt == 0) {
+				if answer_find_type_cnt(FIND_TYPE_HORIZON)+answer_find_type_cnt(FIND_TYPE_VERTICAL)+answer_find_type_cnt(FIND_TYPE_ONE_MASS)*5 >= 4 {
+					stage_name = "自動作成問題Lv2"
+					return 1
+				}
+			}
+			swbreak
+		case 3
+			if (answer_candiate_cnt == 1) {
+				score = answer_find_logic_naked2_cnt*5+answer_find_logic_locked2_cnt*10+answer_find_logic_locked1_cnt
+				if (score == 1 || score == 2) {
+					stage_name = "自動作成問題Lv3"
+					return 1
+				}
+			}
+			swbreak
+		case 4
+			if (answer_candiate_cnt == 1) {
+				if (answer_find_logic_naked2_cnt*5+answer_find_logic_locked2_cnt*10+answer_find_logic_locked1_cnt >= 5) {
+					stage_name = "自動作成問題Lv4"
+					return 1
+				}
+			}
+			swbreak
+		case 5
+			if answer_candiate_cnt >= 2 {
+				stage_name = "自動作成問題Lv5"
+				return 1
+			}
+			swbreak
+	swend
+	return 0
+
+// 自動解答処理
+#deffunc SearchAnswer
+	InitSearch
+	if isFalseCheck() {
+		game_mode = MODE_PLAY
+		failed_type = FAILED_LOGIC
+		return
+	}
+	if isFullInput() {
+		game_mode = MODE_CLEAR
+		return
+	}
+	if Solve() {
+		game_mode = MODE_PLAY
+		InputNumber solve_px, solve_py, solve_num		
+		if isFalseCheck() {
+			game_mode = MODE_PLAY
+			failed_type = FAILED_LOGIC			
+		}
+		answer_logic_type = search_logic_type(0)
+		answer_depth = 1
+		answer_find_type_cnt(search_find_type(0)) = 1          // 解発見タイプ
+		answer_find_step_locked1 = search_find_step_locked1(0) // 解発見時のロジック「ロックされた候補1」のステップ数
+		answer_find_step_locked2 = search_find_step_locked2(0) // 解発見時のロジック「ロックされた候補2」のステップ数
+		answer_find_step_naked2 = search_find_step_naked2(0)   // 解発見時のロジック「2国同盟」のステップ数
+		answer_find_step_naked3 = search_find_step_naked3(0)   // 解発見時のロジック「3国同盟」のステップ数		
+		if answer_find_step_locked1 > 0 : answer_find_logic_locked1_cnt = 1
+		if answer_find_step_locked2 > 0 : answer_find_logic_locked2_cnt = 1		
+		if answer_find_step_naked2 > 0 : answer_find_logic_naked2_cnt = 1
+		if answer_find_step_naked3 > 0 : answer_find_logic_naked3_cnt = 1		
+	}
+	else {
+		for idx, 0, search_index_max(0)
+			SaveSearchData
+			InputNumber search_px(0, idx), search_py(0, idx), search_num(0, idx)			
+			search_index(0) = idx
+			search_depth++
+			if Search() >= SEARCH_STOP_CLEAR_COUNT : _break
+			search_depth--
+			idx = search_index(0)
+			LoadSearchData
+		next
+		if failed_type != 0 { // 探索強制終了
+			game_mode = MODE_PLAY
+			return
+		}
+		if search_clear_cnt >= 1 { // 1通り以上の方法でクリア済み
+			search_depth = 0
+			LoadSearchData
+			game_mode = MODE_PLAY
+			InputNumber search_answer_px, search_answer_py, search_answer_num
+		}
+		else { // クリア不可能だがFALSEになるまで左上から候補ナンバーを適当に入力する
+			for x, 0, 9
+				for y, 0, 9
+					for num, 1, 10
+						if isPossible(x, y, num) {
+							game_mode = MODE_PLAY
+							InputNumber x, y, num
+							return
+						}
+					next
+				next
+			next
+		}
+	}
+	return
+
+// クリアデータ作成
+#defcfunc MakeClearData
+//return 0
+	game_mode = MODE_MAKE_CLEAR
+	// 失敗状態初期化
+	failed_type = 0
+	SaveData
+	LoadFixedData
+	if isFalseCheck() {
+		LoadData
+		InitUsedData // 使用済みデータの初期化
+		game_mode = MODE_PLAY
+		failed_type = FAILED_LOGIC
+		return 0
+	}
+	if isFullInput() {
+		SaveClearData
+		return 1
+	}
+	InitSearch
+	dmy = Search()
+	LoadData
+	InitUsedData // 使用済みデータの初期化
+	if failed_type != 0 { // 探索強制終了
+		game_mode = MODE_PLAY
+		return 0
+	}
+	if search_clear_cnt == 0 { // クリア不可能
+		game_mode = MODE_PLAY
+		failed_type = FAILED_NOT_CLEAR
+		return 0
+	}
+	if search_clear_cnt >= 2 { // 2通り以上のクリア方法がある
+		game_mode = MODE_PLAY
+		failed_type = FAILED_DOUBLE_CLEAR
+		return 0
+	}
+	return 1 // 1通りのみの方法でクリア可能 クリアデータ作成成功
+	
+// 探索処理
+#defcfunc Search
+	await 1 // 探索中処理を占有しないため
+	search_node_cnt++ // 全ノード数をカウント(=Searchが呼ばれた回数※上限に来ると強制終了する)
+	if search_node_cnt >= SEARCH_STOP_NODE_COUNT { // ノード数上限値
+		// 時間がかかるため強制終了
+		failed_type = FAILED_TIMEOUT
+		return 0
+	}
+	if isMaking() && (search_node_cnt >= SEARCH_STOP_NODE_COUNT_MODE_MAKING) { // ノード数上限値(問題作成中)
+		return 0
+	}
+	if isNotMaking() : Display // 探索状態を画面出力
+	if Solve() {
+		SaveSearchData
+		InputNumber solve_px, solve_py, solve_num
+		if isFullInput() { // ロジック解を最後に全マスを入力した(つまりクリアしている)
+			search_clear_cnt++
+			answer_logic_type = 0
+			dim answer_find_type_cnt, FIND_TYPE_MAX // クリア解までの１つ１つの解発見時に使用された発見タイプ別の総数
+			answer_find_logic_locked1_cnt = 0 // クリア解までにロジック「ロックされた候補1」を何度使用したか
+			answer_find_logic_locked2_cnt = 0 // クリア解までにロジック「ロックされた候補2」を何度使用したか
+			answer_find_logic_naked2_cnt = 0  // クリア解までにロジック「2国同盟」を何度使用したか
+			answer_find_logic_naked3_cnt = 0  // クリア解までにロジック「3国同盟」を何度使用したか
+			answer_find_step_locked1_sum = 0  // クリア解までに使用したロジック「ロックされた候補1」のステップ総数
+			answer_find_step_locked2_sum = 0  // クリア解までに使用したロジック「ロックされた候補2」のステップ総数
+			answer_find_step_naked2_sum = 0   // クリア解までに使用したロジック「2国同盟」のステップ総数
+			answer_find_step_naked3_sum = 0   // クリア解までに使用したロジック「3国同盟」のステップ総数
+			answer_find_step_locked1_max = 0  // クリア解までに使用したロジック「ロックされた候補1」の最大ステップ数
+			answer_find_step_locked2_max = 0  // クリア解までに使用したロジック「ロックされた候補2」の最大ステップ数			
+			answer_find_step_naked2_max = 0   // クリア解までに使用したロジック「2国同盟」の最大ステップ数
+			answer_find_step_naked3_max = 0   // クリア解までに使用したロジック「3国同盟」の最大ステップ数			
+			answer_depth = search_depth
+			for i, 0, search_depth
+				if search_logic_type(i) > answer_logic_type : answer_logic_type = search_logic_type(i) // クリア解に至るまでのロジックタイプの最大値を計算
+				answer_find_type_cnt(search_find_type(i))++
+				if search_find_step_locked1(i) > 0 : answer_find_logic_locked1_cnt++
+				if search_find_step_locked2(i) > 0 : answer_find_logic_locked2_cnt++
+				if search_find_step_naked2(i) > 0 : answer_find_logic_naked2_cnt++
+				if search_find_step_naked3(i) > 0 : answer_find_logic_naked3_cnt++
+				if search_find_step_locked1(i) > answer_find_step_locked1_max : answer_find_step_locked1_max = search_find_step_locked1(i)
+				if search_find_step_locked2(i) > answer_find_step_locked2_max : answer_find_step_locked2_max = search_find_step_locked2(i)
+				if search_find_step_naked2(i) > answer_find_step_naked2_max : answer_find_step_naked2_max = search_find_step_naked2(i)
+				if search_find_step_naked3(i) > answer_find_step_naked3_max : answer_find_step_naked3_max = search_find_step_naked3(i)
+				answer_find_step_locked1_sum += search_find_step_locked1(i)
+				answer_find_step_locked2_sum += search_find_step_locked2(i)
+				answer_find_step_naked2_sum += search_find_step_naked2(i)
+				answer_find_step_naked3_sum += search_find_step_naked3(i)
+				if search_index_max(i) > 1 : answer_candiate_cnt *= search_index_max(i) // クリア解に至るまでの、おおよその総分岐数を計算
+				if search_clear_cnt == 1 : search_answer_index(i) = search_index(i) // 初回クリア手順のインデックスを記録
+			next
+			if answer_find_logic_locked1_cnt > 0 : answer_find_step_locked1_avg = double(answer_find_step_locked1_sum)/answer_find_logic_locked1_cnt
+			if answer_find_logic_locked2_cnt > 0 : answer_find_step_locked2_avg = double(answer_find_step_locked2_sum)/answer_find_logic_locked2_cnt
+			if answer_find_logic_naked2_cnt > 0 : answer_find_step_naked2_avg = double(answer_find_step_naked2_sum)/answer_find_logic_naked2_cnt
+			if answer_find_logic_naked3_cnt > 0 : answer_find_step_naked3_avg = double(answer_find_step_naked3_sum)/answer_find_logic_naked3_cnt
+			// クリア手順へと繋がっている深度０(1手目)のノードの座標及びナンバーを解答とする
+			search_answer_px = search_px(0, search_index(0))
+			search_answer_py = search_py(0, search_index(0))
+			search_answer_num = search_num(0, search_index(0))
+			SaveClearData // クリアデータ保存
+			return search_clear_cnt
+		}
+		search_depth++
+		if Search() >= SEARCH_STOP_CLEAR_COUNT : return search_clear_cnt
+		search_depth--
+		LoadSearchData
+	}
+	else {
+		for idx, 0, search_index_max(search_depth)
+			SaveSearchData
+			InputNumber search_px(search_depth, idx), search_py(search_depth, idx), search_num(search_depth, idx)			
+			search_index(search_depth) = idx
+			search_depth++
+			if Search() >= SEARCH_STOP_CLEAR_COUNT : return search_clear_cnt
+			search_depth--
+			idx = search_index(search_depth)
+			LoadSearchData
+			
+		next
+	}
+	return search_clear_cnt
+
+// ロジックにより答えを導き出す処理、導き出せない場合は可能性のあるナンバーを総当たりする子ノードを生成
+#defcfunc Solve
+
+	// データ矛盾なら子ノードを生成しない
+	if isFalseCheck() {
+		search_index_max(search_depth) = 0
+		return 0
+	}
+
+	// 変数初期化
+	ret_type = 0
+	locked1_step = 0
+	locked2_step = 0
+	naked2_step = 0
+	naked3_step = 0
+	dim node_delete_flag, 9, 9 // ノード単位の削除フラグ初期化
+	dim node_logic_flag, 9, 9  // ノード単位のロジック強調フラグ初期化
+	
+	ret_type = getFindType()
+	if isSetFind() : return 1 // 解が確定しているなら解答する
+
+	NewLogicData
+
+	// ロジック処理で候補ナンバーに変化が起きなくなるまでループ。但し解がみつかれば終了
+	for logic_loop_cnt, 0, LIMIT_LOGIC_LOOP	
+		bChangedLocked1 = 0 // 「ロックされた候補1」による変化フラグ初期化
+		bChangedLocked2 = 0 // 「ロックされた候補2」による変化フラグ初期化
+		bChangedNaked2 = 0  // 「2国同盟」による変化フラグ初期化
+		bChangedNaked3 = 0  // 「3国同盟」による変化フラグ初期化
+		// ロジック処理(ロックされた候補1)で候補ナンバーに変化が起きなくなるまでループ。但し解がみつかれば終了
+		while locked1_step < LIMIT_LOGIC_LOOP
+			/**************************** ロジック(ロックされた候補1)によって候補ナンバーを消去していく処理 *******************************************/
+			dim delete_flag, 9, 9 // 削除フラグ初期化
+			dim logic_flag, 9, 9  // ロジック強調フラグ初期化
+			LogicLocked1          // 消去できるナンバーをフラグ化
+			bChangedLocked1 = DeleteFlagData() // 削除フラグに従ってワーキングデータのフラグを削除する
+			if bChangedLocked1 == 0 : _break // 変化なしなら終了
+			locked1_step++ // 変化ありならステップ数インクリメント
+			/******************************************************************************************************************************************/
+			ret_type = getFindType()
+			if ret_type > 0 : _break // 解が確定なら終了
+		wend
+		if ret_type > 0 : _break // 解が確定なら終了
+
+		// ロジック処理(ロックされた候補2)で候補ナンバーに変化が起きなくなるまでループ。但し解がみつかれば終了
+		while locked2_step < LIMIT_LOGIC_LOOP
+			/***************************** ロジック(ロックされた候補2)によって候補ナンバーを消去していく処理 ******************************************/
+			dim delete_flag, 9, 9 // 削除フラグ初期化
+			dim logic_flag, 9, 9  // ロジック強調フラグ初期化
+			LogicLocked2          // 消去できるナンバーをフラグ化
+			bChangedLocked2 = DeleteFlagData() // 削除フラグに従ってワーキングデータのフラグを削除する			
+			if bChangedLocked2 ==0 : _break // 変化なしなら終了
+			locked2_step++ // 変化ありならステップ数インクリメント
+			/******************************************************************************************************************************************/			
+			ret_type = getFindType()
+			if ret_type > 0 : _break // 解が確定なら終了
+		wend
+		if ret_type > 0 : _break // 解が確定なら終了
+
+		// ロジック処理(2国同盟)で候補ナンバーに変化が起きなくなるまでループ。但し解がみつかれば終了
+		while naked2_step < LIMIT_LOGIC_LOOP
+			/********************************* ロジック(2国同盟)によって候補ナンバーを消去していく処理 *************************************************/
+			dim delete_flag, 9, 9 // 削除フラグ初期化
+			dim logic_flag, 9, 9  // ロジック強調フラグ初期化
+			LogicRenewUsedTypeB          // 消去できるナンバーをフラグ化
+			bChangedNaked2 = DeleteFlagData() // 削除フラグに従ってワーキングデータのフラグを削除する			
+			if bChangedNaked2 ==0 : _break // 変化なしなら終了
+			naked2_step++ // 変化ありならステップ数インクリメント
+			/******************************************************************************************************************************************/			
+			ret_type = getFindType()
+			if ret_type > 0 : _break // 解が確定なら終了
+		wend
+		if ret_type > 0 : _break // 解が確定なら終了
+
+		// ロジック処理(3国同盟)で候補ナンバーに変化が起きなくなるまでループ。但し解がみつかれば終了
+		while naked3_step < LIMIT_LOGIC_LOOP
+			/********************************* ロジック(3国同盟)によって候補ナンバーを消去していく処理 *************************************************/
+			dim delete_flag, 9, 9 // 削除フラグ初期化
+			dim logic_flag, 9, 9  // ロジック強調フラグ初期化
+			LogicRenewUsedTypeB          // 消去できるナンバーをフラグ化
+			bChangedNaked3 = DeleteFlagData() // 削除フラグに従ってワーキングデータのフラグを削除する			
+			if bChangedNaked3 ==0 : _break // 変化なしなら終了
+			naked3_step++ // 変化ありならステップ数インクリメント
+			/******************************************************************************************************************************************/			
+			ret_type = getFindType()
+			if ret_type > 0 : _break // 解が確定なら終了
+		wend
+		if ret_type > 0 : _break // 解が確定なら終了
+
+		if isAllTypeNoChanged() : _break // ロジックによるデータ更新がなくなったら終了
+	next
+
+	CloseLogicData
+	
+	if isSetFind() : return 1 // 解が確定しているなら解答する
+
+	ret_type = getFindType()
+	if isSetFind() : return 1 // 解が確定しているなら解答する
+	
+	/********************************************** ロジックによる解が見つけられないため、総当たり用子ノード生成 ******************************************************/
+	// ０．変数初期化
+	// １．未入力マスの中で最も候補数が少ないマスを選択
+	// ２．問題作成中ならばランダムにマスを選び直す
+	// ３．1～9までの数字が入ったリスト生成
+	// ４．そのリストをランダムに並び変える
+	// ５．選ばれた未入力マスから分岐させるノードをランダム順のナンバーで生成する
+	/*******************************************************************************************************************************************************************/	
+	/////////////////////////////////// ０．変数初期化 ////////////////////////////////////////////
+	search_logic_type(search_depth) = 0
+	search_find_type(search_depth) = 0         // 解発見タイプ初期化
+	search_find_step_locked1(search_depth) = 0 // 解発見「ロックされた候補1」ステップ数初期化
+	search_find_step_locked2(search_depth) = 0 // 解発見「ロックされた候補2」ステップ数初期化
+	search_find_step_naked2(search_depth) = 0  // 解発見「2国同盟」ステップ数初期化
+	search_find_step_naked3(search_depth) = 0  // 解発見「3国同盟」ステップ数初期化
+	search_index_max(search_depth) = 0         // 子ノードとして可能性のある候補数の初期化
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/////////////////////////////////// １．未入力マスの中で最も候補数が少ないマスを選択 ///////////////////////////////////////////
+	// 未入力座標リスト
+	dim list_px, 81
+	dim list_py, 81
+	list_cnt = 0 // リスト要素数
+	min_num_cnt = 10
+	for x, 0, 9
+		for y, 0, 9
+			if isEntered(x, y) : _continue // 入力済みマスはスキップ
+			if isNoneNumber(x, y) : _continue // 候補ナンバーなしもスキップ
+			num_cnt = 0
+			for num, 0, 9
+				if isPossible(x, y, num) : num_cnt++
+			next
+			if num_cnt < min_num_cnt {
+				list_idx = list_cnt
+				min_num_cnt = num_cnt
+			}
+			list_px(list_cnt) = x
+			list_py(list_cnt) = y
+			list_cnt++
+		next
+	next
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////// ２．問題作成中ならばランダムにマスを選び直す /////////////////////////////////////////////////
+	if isMaking() : list_idx = rnd(list_cnt) // 問題作成中ならば、ランダムに未入力マスを選択し直す
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////// ３．1～9までの数字が入ったリスト生成 //////////////////////////////////////////////
+	// 1～9までのナンバーリスト
+	dim list_num, 9
+	for i, 0, 9
+		list_num(i) = i+1
+	next
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////// ４．そのリストをランダムに並び変える //////////////////////////////////////////////
+	// リストの要素を並び変え
+	for i, 0, SHUFFLE_COUNT
+		// 要素入れ替え
+		i0 = rnd(9)
+		i1 = rnd(9)
+		m = list_num(i0)
+		list_num(i0) = list_num(i1)
+		list_num(i1) = m
+	next
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////// ５．選ばれた未入力マスから分岐させるノードをランダム順のナンバーで生成する //////////////////////////////////////////////
+	x = list_px(list_idx)
+	y = list_py(list_idx)
+//	node_candiate_cnt = 0 // このノードの分岐数
+	for i, 0, 9
+		num = list_num(i) // ランダム順のナンバーリスト
+		if isPossible(x, y, num) { // 候補ナンバーと一致
+//			node_candiate_cnt++ // このノードの分岐数
+			// 現在のノード(分岐する子ノード)に候補の座標(x,y)とナンバーを保持
+			search_px(search_depth, search_index_max(search_depth)) = x
+			search_py(search_depth, search_index_max(search_depth)) = y
+			search_num(search_depth, search_index_max(search_depth)) = num
+			search_index_max(search_depth)++
+		}
+	next
+	if search_index_max(search_depth) == 1 {//////////////debug
+		display
+		assert 1!1
+	}
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*******************************************************************************************************************************************************************/
+	
+	return 0
+
+#defcfunc isSetFind
+	if ret_type == 0 : return 0
+	// 入力候補から確定ナンバーを見つけているので解答
+	solve_px = ret_x
+	solve_py = ret_y
+	solve_num = ret_num
+	search_logic_type(search_depth) = ret_type+locked1_step*10+locked2_step*100 //スコア計算
+	search_find_type(search_depth) = ret_type
+	search_find_step_locked1(search_depth) = locked1_step
+	search_find_step_locked2(search_depth) = locked2_step
+	search_find_step_naked2(search_depth) = naked2_step
+	search_find_step_naked3(search_depth) = naked3_step
+	return 1
+
+// 入力候補が1つしかないマスがある場合は、そのタイプを返す(※難易度が簡単な順に判定)
+#defcfunc getFindType
+	// 同じボックス内に1つのナンバーしか候補がない場合
+	if isBoxOneCandiate() : return FIND_TYPE_BOX
+	// 同じ水平ライン内にに1つのナンバーしか候補がない場合
+	if isHorizonOneCandiate() : return FIND_TYPE_HORIZON
+	// 同じ垂直ライン内に1つのナンバーしか候補がない場合
+	if isVerticalOneCandiate() : return FIND_TYPE_VERTICAL
+	// 1マスに1つのナンバーしか候補がない場合
+	if isMassOneCandiate() : return FIND_TYPE_ONE_MASS
+	return 0
+
+// ロジック解法用データ生成
+#deffunc NewLogicData
+	for i, 0, 9*9 // 種類i*9+num→[pos=x*9+y]リスト
+		newmod ls_box_pos, List, 9      // ボックスiの候補ナンバーnumの座標リスト
+		newmod ls_horizon_pos, List, 9  // 横ラインiの候補ナンバーnumの座標リスト
+		newmod ls_vertical_pos, List, 9 // 縦ラインiの候補ナンバーnumの座標リスト
+	next
+	for i, 0, 9 // 種類i→[num]リスト
+		newmod ls_box_num, List, 9      // ボックスiの候補ナンバーリスト
+		newmod ls_horizon_num, List, 9  // 横ラインiの候補ナンバーリスト
+		newmod ls_vertical_num, List, 9 // 縦ラインiの候補ナンバーリスト
+	next
+	for i, 0, 9*9 // pos=x*9+y→[num]リスト
+		newmod ls_mass_num, List, 9 // 座標x,yの候補ナンバーリスト
+	next
+
+	for x, 0, 9
+		for y, 0, 9
+			for num, 1, 10
+				if isPossible(x, y, num) { // 座標x,yに候補ナンバーnumあり
+					ListAddVal ls_mass_num(XYPos(x, y)), num // 座標x,yのリストに候補ナンバーnumを追加
+				}
+			next
+		next
+	next
+	for num, 1, 10 // 候補ナンバーで検索
+		// ボックス、横ライン、縦ラインの種類を検索
+		for i, 0, 9
+			box_x0 = i\3*3 // ボックスiの左上座標
+			box_y0 = i/3*3 // ボックスiの左上座標
+			horizon_y = i  // 横ラインiのY座標
+			vertical_x = i // 縦ラインiのX座標
+			box_cnt = 0      // ボックスiの候補ナンバーの種類数
+			horizon_cnt = 0  // 横ラインiの候補ナンバーの種類数
+			vertical_cnt = 0 // 縦ラインiの候補ナンバーの種類数
+			// ボックス、横ライン、縦ラインの要素を検索
+			for j, 0, 9
+				box_x = box_x0+j\3 // ボックスiの要素jのx座標
+				box_y = box_y0+j/3 // ボックスiの要素jのy座標
+				horizon_x = j      // 横ラインiの要素jのx座標
+				vertical_y = j     // 縦ラインiの要素jのy座標
+				if isPossible(box_x, box_y, num) { // 座標x,yに候補ナンバーnumあり
+					ListAddVal ls_box_pos(ListId(i, num)), XYPos(box_x, box_y) // ボックスiの候補ナンバーnumのリストに座標x,yを追加
+					box_cnt++
+				}
+				if isPossible(horizon_x, horizon_y, num) { // 座標x,yに候補ナンバーnumあり
+					ListAddVal ls_horizon_pos(ListId(i, num)), XYPos(horizon_x, horizon_y) // 横ラインiの候補ナンバーnumのリストに座標x,yを追加
+					horizon_cnt++
+				}
+				if isPossible(vertical_x, vertical_y, num) { // 座標x,yに候補ナンバーnumあり
+					ListAddVal ls_vertical_pos(ListId(i, num)), XYPos(vertical_x, vertical_y) // 縦ラインiの候補ナンバーnumのリストに座標x,yを追加
+					vertical_cnt++
+				}
+			next
+			if box_cnt > 0      : ListAddVal ls_box_num(i), num      // ボックスiのリストに候補ナンバー追加
+			if horizon_cnt > 0  : ListAddVal ls_horizon_num(i), num  // 横ラインiのリストに候補ナンバー追加
+			if vertical_cnt > 0 : ListAddVal ls_vertical_num(i), num // 縦ラインiのリストに候補ナンバー追加			
+		next
+	next
+	
+	return
+
+// ロジック解法用データ更新(候補削除時)
+#deffunc RenewLogicData int renew_logic_x, int renew_logic_y, int renew_logic_num
+	x = renew_logic_x
+	y = renew_logic_y
+	num = renew_logic_num
+	xy = XYPos(x, y)
+
+	/************************************* 座標の候補ナンバーリストから削除対象ナンバーを削除 ************************************/
+	ls = ls_mass_num(xy)     // 座標の候補ナンバーリスト
+	ele_cnt = ListGetCnt(ls) // 座標に候補ナンバーがいくつあるか
+	ListCurStart(ls)         // リストカーソルを先頭へ
+	// 全ナンバー検索(削除対象の座標が対象)
+	for i, 0, ele_cnt
+		if ListGetVal(ls) == num { // 対象ナンバー発見
+			ListDelEle ls          // 対象ナンバー削除
+			_break
+		}
+	next
+	/******************************************************************************************************************************/
+
+	/******************************** ボックスの候補ナンバーの座標リストから削除対象座標を削除 *************************************/
+	box_i = BoxId(x, y)
+	ls_i = ListId(box_i, num)
+	ls = ls_box_pos(ls_i)    // ボックスの候補ナンバーの座標リスト
+	ele_cnt = ListGetCnt(ls) // ボックスに候補ナンバーがいくつあるか
+	ListCurStart(ls)         // リストカーソルを先頭へ
+	// 全座標検索(削除対象が属しているBOX,削除対象のナンバーが対象)
+	for i, 0, ele_cnt
+		if ListGetVal(ls) == xy { // 対象座標発見
+			ListDelEle ls         // 対象座標削除
+			if ele_cnt == 1 { // 削除されたことによりボックスに候補ナンバーが一つも存在しない状態
+				/************************ ボックスの候補ナンバーリストから削除対象ナンバーを削除 ***************************/
+				ls = ls_box_num(box_i)
+				ele_cnt = ListGetCnt(ls)
+				ListCurStart(ls)
+				// 全ナンバー検索(削除対象が属しているBOXが対象)
+				for i, 0, ele_cnt
+					if ListGetVal(ls) == num { // 対象ナンバー発見
+						ListDelEle ls          // 対象ナンバー削除
+						_break
+					}
+				next
+				/***********************************************************************************************************/
+			}
+			_break
+		}
+		ListCurNext ls // カーソルを次へ
+	next
+	/*******************************************************************************************************************************/
+
+	/******************************** 横ラインの候補ナンバーの座標リストから削除対象座標を削除 *************************************/
+	ls_i = ListId(y, num)
+	ls = ls_horizon_pos(ls_i) // 横ラインの候補ナンバーの座標リスト
+	ele_cnt = ListGetCnt(ls)  // 横ラインに候補ナンバーがいくつあるか
+	ListCurStart(ls)          // リストカーソルを先頭へ
+	// 全座標検索(削除対象が属している横ライン,削除対象のナンバーが対象)
+	for i, 0, ele_cnt
+		if ListGetVal(ls) == xy { // 対象座標発見
+			ListDelEle ls         // 対象座標削除
+			if ele_cnt == 1 { // 削除されたことにより横ラインに候補ナンバーが一つも存在しない状態
+				/************************* 横ラインの候補ナンバーリストから削除対象ナンバーを削除 ****************************/
+				ls = ls_horizon_num(y)
+				ele_cnt = ListGetCnt(ls)
+				ListCurStart(ls)
+				// 全ナンバー検索(削除対象が属している横ラインが対象)				
+				for i, 0, ele_cnt
+					if ListGetVal(ls) == num { // 対象ナンバー発見
+						ListDelEle ls          // 対象ナンバー削除
+						_break
+					}
+				next
+				/*************************************************************************************************************/
+			}			
+			_break
+		}
+		ListCurNext ls // カーソルを次へ
+	next
+	/*******************************************************************************************************************************/
+	
+	/******************************** 縦ラインの候補ナンバーの座標リストから削除対象座標を削除 *************************************/
+	ls_i = ListId(x, num)
+	ls = ls_vertical_pos(ls_i) // 縦ラインの候補ナンバーの座標リスト
+	ele_cnt = ListGetCnt(ls)   // 縦ラインに候補ナンバーがいくつあるか
+	ListCurStart(ls)           // リストカーソルを先頭へ
+	// 全座標検索(削除対象が属している縦ライン,削除対象のナンバーが対象)
+	for i, 0, ele_cnt
+		if ListGetVal(ls) == xy { // 対象座標発見
+			ListDelEle ls         // 対象座標削除
+			if ele_cnt == 1 { // 削除されたことにより縦ラインに候補ナンバーが一つも存在しない状態
+				/************************** 縦ラインの候補ナンバーリストから削除対象ナンバーを削除 *****************************/
+				ls = ls_vertical_num(x)
+				ele_cnt = ListGetCnt(ls)
+				ListCurStart(ls)
+				// 全ナンバー検索(削除対象が属している縦ラインが対象)				
+				for i, 0, ele_cnt
+					if ListGetVal(ls) == num { // 対象ナンバー発見
+						ListDelEle ls          // 対象ナンバー削除
+						_break
+					}
+				next
+				/***************************************************************************************************************/
+			}			
+			_break
+		}
+		ListCurNext ls // カーソルを次へ
+	next
+	/*******************************************************************************************************************************/
+	
+	return
+
+// ロジック解法用データ解放
+#deffunc CloseLogicData
+	foreach ls_box_pos
+		delmod ls_box_pos(cnt)
+	loop
+	foreach ls_horizon_pos
+		delmod ls_horizon_pos(cnt)
+	loop
+	foreach ls_vertical_pos
+		delmod ls_vertical_pos(cnt)
+	loop
+	foreach ls_box_num
+		delmod ls_box_num(cnt)
+	loop
+	foreach ls_horizon_num
+		delmod ls_horizon_num(cnt)
+	loop
+	foreach ls_vertical_num
+		delmod ls_vertical_num(cnt)
+	loop
+	foreach ls_mass_num
+		delmod ls_mass_num(cnt)
+	loop
+	return
+
+// 「ロックされた候補1」による消去できるナンバーピックアップ(フラグ化)
+// 特定ナンバーがボックスラインのみに含まれるとき、そのラインでは特定ナンバーが必ず使用されるため、他のマスの候補を消去できる
+#deffunc LogicLocked1
+	for i, 0, 9
+		for num, 1, 10		
+			ls = ls_box_pos(ListId(i, num))
+			ele_cnt = ListGetCnt(ls)
+			if isSearchingMode() && (ele_cnt == 1) : return // 探索中の場合は、そのナンバーで確定なのでそれ以上ロジックを進めない
+			if (ele_cnt != 2) && (ele_cnt != 3) : _continue
+			ListCurStart ls
+			ps = ListGetVal(ls)
+			x0 = PosX(ps)
+			y0 = PosY(ps)
+			ListCurNext ls
+			bVertical = 1 // ボックスiのナンバーnumが縦ラインで並んでいるフラグの初期化
+			bHorizon = 1  // ボックスiのナンバーnumが横ラインで並んでいるフラグの初期化
+			for n, 1, ele_cnt
+				ps = ListGetVal(ls)
+				x = PosX(ps)
+				y = PosY(ps)
+				if x != x0 : bVertical = 0 // 縦ラインではない
+				if y != y0 : bHorizon = 0  // 横ラインではない
+				ListCurNext ls
+			next
+			bChanged = 0
+			if        (bVertical == 1) { // 縦ラインに並んでいる
+				for y, 0, 9
+					if BoxId(x0, y) == i : _continue // ボックスiの座標(自分自身)は含めない
+					change_bit = getChangeBit(x0, y, USED_BIT<<num) // データ変更があるビットを取得する
+					if (change_bit != 0) && isNotEntered(x0, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+					delete_flag(x0, y) |= change_bit // 削除される候補のビットを立てる
+				next
+			}
+			else : if (bHorizon == 1) { // 横ラインに並んでいる
+				for x, 0, 9
+					if BoxId(x, y0) == i : _continue // ボックスiの座標(自分自身)は含めない
+					change_bit = getChangeBit(x, y0, USED_BIT<<num) // データ変更があるビットを取得する
+					if (change_bit != 0) && isNotEntered(x, y0) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+					delete_flag(x, y0) |= change_bit // 削除される候補のビットを立てる
+				next
+			}
+			// 変更ありなら前提ロジックフラグ更新
+			if bChanged == 1 {
+				ListCurStart ls
+				for n, 0, ele_cnt
+					ps = ListGetVal(ls)
+					x = PosX(ps)
+					y = PosY(ps)
+					logic_flag(x, y) |= 1<<num
+					ListCurNext ls
+				next
+			}
+		next
+	next
+	return
+
+// 「ロックされた候補2」による消去できるナンバーピックアップ(フラグ化)
+// 特定ナンバーがボックスに２つ含まれるとき、それと同じ行または列にある特定ナンバーが違うボックスに２つ含まれるとき、その２つラインでは特定ナンバーが必ず使用されるため、他のマスの候補を消去できる
+#deffunc LogicLocked2
+	for i, 0, 9
+		for num, 1, 10
+			ls = ls_box_pos(ListId(i, num))
+			ele_cnt = ListGetCnt(ls)
+			if isSearchingMode() && (ele_cnt == 1) : return // 探索中の場合は、そのナンバーで確定なのでそれ以上ロジックを進めない
+			if ele_cnt != 2 : _continue
+			ListCurStart ls
+			ps = ListGetVal(ls)
+			x0 = PosX(ps)
+			y0 = PosY(ps)
+			ListCurNext ls
+			ps = ListGetVal(ls)
+			x1 = PosX(ps)
+			y1 = PosY(ps)
+			i_n = i\3
+			i_m = i/3
+			bChanged = 0
+			// ボックスを横に検索
+			for j_n, 0, 3
+				if j_n == i_n : _continue
+				j = j_n+i_m*3
+				ls2 = ls_box_pos(ListId(j, num))
+				ele_cnt2 = ListGetCnt(ls2)
+				if ele_cnt2 != 2 : _continue
+				ListCurStart ls2
+				ps = ListGetVal(ls2)
+				x2 = PosX(ps)
+				y2 = PosY(ps)
+				ListCurNext ls2
+				ps = ListGetVal(ls2)
+				x3 = PosX(ps)
+				y3 = PosY(ps)
+				if (y0 == y2) && (y1 == y3) { // 「ロックされた候補2」に一致
+					for x, 0, 9
+						if (BoxId(x, y0) == i) || (BoxId(x, y0) == j) : _continue // ボックスiとボックスjの座標(自分自身)は含めない
+						change_bit = getChangeBit(x, y0, USED_BIT<<num) // データ変更があるビットを取得する
+						if (change_bit != 0) && isNotEntered(x, y0) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+						delete_flag(x, y0) |= change_bit // 削除される候補のビットを立てる
+						change_bit = getChangeBit(x, y1, USED_BIT<<num) // データ変更があるビットを取得する
+						if (change_bit != 0) && isNotEntered(x, y1) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+						delete_flag(x, y1) |= change_bit // 削除される候補のビットを立てる
+					next
+					_break
+				}
+			next
+			// 変更ありなら前提ロジックフラグ更新
+			if bChanged == 1 {
+				logic_flag(x0, y0) |= 1<<num
+				logic_flag(x1, y1) |= 1<<num
+				logic_flag(x2, y2) |= 1<<num
+				logic_flag(x3, y3) |= 1<<num
+				_continue
+			}			
+			// ボックスを縦に検索
+			for j_m, 0, 3
+				if j_m == i_m : _continue
+				j = i_n+j_m*3
+				ls2 = ls_box_pos(ListId(j, num))
+				ele_cnt2 = ListGetCnt(ls2)
+				if ele_cnt2 != 2 : _continue
+				ListCurStart ls2
+				ps = ListGetVal(ls2)
+				x2 = PosX(ps)
+				y2 = PosY(ps)
+				ListCurNext ls2
+				ps = ListGetVal(ls2)
+				x3 = PosX(ps)
+				y3 = PosY(ps)
+				if (x0 == x2) && (x1 == x3) { // 「ロックされた候補2」に一致
+					for y, 0, 9
+						if (BoxId(x0, y) == i) || (BoxId(x0, y) == j) : _continue // ボックスiとボックスjの座標(自分自身)は含めない
+						change_bit = getChangeBit(x0, y, USED_BIT<<num) // データ変更があるビットを取得する
+						if (change_bit != 0) && isNotEntered(x0, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+						delete_flag(x0, y) |= change_bit // 削除される候補のビットを立てる
+						change_bit = getChangeBit(x1, y, USED_BIT<<num) // データ変更があるビットを取得する
+						if (change_bit != 0) && isNotEntered(x1, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+						delete_flag(x1, y) |= change_bit // 削除される候補のビットを立てる
+					next
+					_break
+				}
+			next
+			// 変更ありなら前提ロジックフラグ更新
+			if bChanged == 1 {
+				logic_flag(x0, y0) |= 1<<num
+				logic_flag(x1, y1) |= 1<<num
+				logic_flag(x2, y2) |= 1<<num
+				logic_flag(x3, y3) |= 1<<num
+				_continue
+			}
+		next
+	next
+	return
+
+// ロジックBによる候補できるナンバーピックアップ(フラグ化)
+// ボックスラインの要素全ての候補数が未入力マス以下ならば、そのラインは候補ナンバーが必ず使用されるため、他のマスの候補を消去できる
+//// 探索中は確定ナンバーが見つかった時点でTRUE(=1)を返し終了する
+#deffunc LogicRenewUsedTypeB
+//	bChangedTypeB = 0 // ロジックTYPE_Bを1行程行ったときに変更データがあるかどうかのフラグ
+	//dim delete_flag, 9, 9 // 候補削除フラグ初期化
+//	bChanged = 0 // データ変更されたかどうかのフラグを初期化
+	for i, 0, 9 // ボックスの種類を検索
+		dim box_horizon, 3　// ボックスの水平ラインで使用されるナンバーフラグ
+		dim box_vertical, 3 // ボックスの垂直ラインで使用されるナンバーフラグ
+		dim box_horizon_cnt, 3  // ボックス水平ラインの未入力マスの数(0～3)
+		dim box_vertical_cnt, 3 // ボックス垂直ラインの未入力マスの数(0～3)
+		// 対象ボックスの左上座標
+		x0 = i\3*3
+		y0 = i/3*3
+		/************************************* ボックスライングループの使用可能ナンバーの合成 *********************************************/
+		for dy, 0, 3 // ボックス水平ラインの種類を検索
+			for dx, 0, 3 // ボックス水平ラインの要素を検索
+				if isEntered(x0+dx, y0+dy) : _continue // 入力済みマスはスキップ
+				box_horizon(dy) |= data(x0+dx, y0+dy)^ALL_USED_BIT // ボックス水平ラインの使用可能ナンバーフラグ
+				box_horizon_cnt(dy)++ // ボックス水平ラインの未入力マスの数をカウント
+			next
+		next
+		for dx, 0, 3 // ボックス垂直ラインの種類を検索
+			for dy, 0, 3 // ボックス垂直ラインの要素を検索
+				if isEntered(x0+dx, y0+dy) : _continue // 入力済みマスはスキップ
+				box_vertical(dx) |= data(x0+dx, y0+dy)^ALL_USED_BIT // ボックス垂直ラインの使用可能ナンバーフラグ
+				box_vertical_cnt(dx)++ // ボックス垂直ラインの未入力マスの数をカウント
+			next
+		next
+		/***************************************************************************************************************************************/
+		
+		/****************************************************************** ボックス水平ラインによる候補消去 ***********************************************************************/
+		for dy, 0, 3 // ボックス水平ラインの種類を検索
+			dim box_line_num, 3  // ボックス水平ラインで使用可能なナンバー
+			box_line_num_cnt = 0 // ボックス水平ラインで使用可能なナンバーの候補数
+			for num, 1, 10 // ナンバー検索
+				if box_horizon(dy) & USED_BIT<<num { // ボックス水平ラインで検索ナンバーが使用可能
+					box_line_num(box_line_num_cnt) = num // ヒットした検索ナンバーを保持
+					box_line_num_cnt++ // ボックス水平ラインで使用可能なナンバーの候補数をインクリメント
+					if box_line_num_cnt > box_horizon_cnt(dy) : _break // ナンバーの候補数が未入力マスより多い場合、候補を消去できないためこれ以上検索する必要はない
+				}
+			next
+			if box_line_num_cnt == 0 : _continue // ボックス水平ラインの全てのマスが入力済み
+			if box_line_num_cnt == 1 { // ナンバーの候補数が1つの場合
+				if isSearchingMode() : return // 探索中の場合は、そのナンバーで確定なのでそれ以上ロジックを進めない
+				_continue                     // プレイモード時の候補消去ロジック処理ならば無視して処理続行
+			}
+			if box_line_num_cnt > box_horizon_cnt(dy) : _continue // ナンバーの候補数が未入力マスより多い場合、候補を消去できないためスキップ
+			bChanged = 0
+			y = y0+dy
+			for x, 0, 9 // ボックス水平ラインの延長線上の水平ラインを検索
+				if (x == x0) || (x == x0+1) || (x == x0+2) : _continue // 対象ボックス水平ラインは含めない
+				change_bit = getChangeBit(x, y, box_horizon(dy)) // データ変更があるビットを取得する
+//				if isEntered(x, y) : change_bit = 0 // 入力済みマスの場合はデータ変更があってもビットを立てない
+//				if change_bit != 0 : bChanged = 1 // 変更がある場合はフラグを立てる
+				if (change_bit != 0) && isNotEntered(x, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+				delete_flag(x, y) |= change_bit // 削除される候補のビットを立てる
+				//one_cycle_delete_flag(x, y) |= delete_flag(x, y)
+				/*
+				if isNotSearchingMode : _continue // 探索中は下の判定処理を行う
+				if isDefinedAfterDelete(x, y, delete_flag(x, y)) == 0 : _continue // 確定入力できるならロジック処理を停止、できないなら継続
+				ret_x = x
+				ret_y = y
+//				bChangedTypeB = 1
+				if bChanged == 1 : setLogicFlagBoxHorizon x0, y0+dy // 変更ありなら前提ロジックフラグ更新
+				return 1 
+//				data(x, y) |= box_horizon(dy) // サブボック水平ライン上で候補ナンバーが必ず使用されるため、同じ延長線上水平ラインで使用されることはないため候補ナンバー消去
+*/
+			next
+			// ボックス内を検索
+			for y, y0, y0+3
+				if y-y0 == dy : _continue // 対象ボックス水平ラインは含めない
+				for x, x0, x0+3
+					change_bit = getChangeBit(x, y, box_horizon(dy)) // データ変更があるビットを取得する
+//					if isEntered(x, y) : change_bit = 0 // 入力済みマスの場合はデータ変更があってもビットを立てない					
+//					if change_bit != 0 : bChanged = 1 // 変更がある場合はフラグを立てる
+					if (change_bit != 0) && isNotEntered(x, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+					delete_flag(x, y) |= change_bit // 削除される候補のビットを立てる
+					//one_cycle_delete_flag(x, y) |= delete_flag(x, y)
+					/*
+					if isNotSearchingMode : _continue // 探索中は下の判定処理を行う
+					if isDefinedAfterDelete(x, y, delete_flag(x, y)) == 0 : _continue // 確定入力できるならロジック処理を停止、できないなら継続
+					ret_x = x
+					ret_y = y
+//					bChangedTypeB = 1
+					if bChanged == 1 : setLogicFlagBoxHorizon x0, y0+dy // 変更ありなら前提ロジックフラグ更新
+					return 1 
+//					data(x, y) |= box_horizon(dy) // ボックス水平ライン上で候補ナンバーが必ず使用されるため、同じボックス内で使用されることはないため候補ナンバー消去
+*/
+				next
+			next
+			if bChanged == 1 {
+				for box_line_num_index, 0, box_line_num_cnt
+					num = box_line_num(box_line_num_index)
+					setLogicFlagBoxHorizon x0, y0+dy // 変更ありなら前提ロジックフラグ更新
+				next
+			}
+		next
+		/********************************************************************************************************************************************************************************/
+
+		/*********************************************************************** ボックス垂直ラインによる候補消去 *******************************************************************/
+		for dx, 0, 3 // ボックス垂直ラインの種類を検索
+			dim box_line_num, 3  // ボックス垂直ラインで使用可能なナンバー
+			box_line_num_cnt = 0 // ボックス垂直ラインで使用可能なナンバーの候補数
+			for num, 1, 10 // ナンバー検索
+				if box_vertical(dx) & USED_BIT<<num { // ボックス垂直ラインで検索ナンバーが使用可能
+					box_line_num(box_line_num_cnt) = num // ヒットした検索ナンバーを保持
+					box_line_num_cnt++ // ボックス垂直ラインで使用可能なナンバーの候補数をインクリメント
+					if box_line_num_cnt > box_vertical_cnt(dx) : _break // ナンバーの候補数が未入力マスより多い場合、候補を消去できないためこれ以上検索する必要はない
+				}
+			next
+			if box_line_num_cnt == 0 : _continue // ボックス垂直ラインの全てのマスが入力済み
+			if box_line_num_cnt == 1 { // ナンバーの候補数が1つの場合
+				if isSearchingMode() : return // 探索中の場合は、そのナンバーで確定なのでそれ以上ロジックを進めない
+				_continue                     // プレイモード時の候補消去ロジック処理ならば無視して処理続行
+			}
+			if box_line_num_cnt > box_vertical_cnt(dx) : _continue // ナンバーの候補数が未入力マスより多い場合、候補を消去できないためスキップ
+			bChanged = 0
+			x = x0+dx
+			for y, 0, 9 // ボックス垂直ラインの延長線上の垂直ラインを検索
+				if (y == y0) || (y == y0+1) || (y == y0+2) : _continue // 対象ボックス垂直ラインは含めない				
+				change_bit = getChangeBit(x, y, box_vertical(dx)) // データ変更があるビットを取得する
+//				if isEntered(x, y) : change_bit = 0 // 入力済みマスの場合はデータ変更があってもビットを立てない				
+//				if change_bit != 0 : bChanged = 1 // 変更がある場合はフラグを立てる
+				if (change_bit != 0) && isNotEntered(x, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+				delete_flag(x, y) |= change_bit // 削除される候補のビットを立てる
+				//one_cycle_delete_flag(x, y) |= delete_flag(x, y)
+				/*
+				if isNotSearchingMode : _continue // 探索中は下の判定処理を行う
+				if isDefinedAfterDelete(x, y, delete_flag(x, y)) == 0 : _continue // 確定入力できるならロジック処理を停止、できないなら継続
+				ret_x = x
+				ret_y = y
+//				bChangedTypeB = 1
+				if bChanged == 1 : setLogicFlagBoxVertical x0+dx, y0 // 変更ありなら前提ロジックフラグ更新
+				return 1 				
+//				data(x, y) |= box_vertical(dx) // ボックス垂直ライン上で候補ナンバーが必ず使用されるため、同じ延長線上垂直ラインで使用されることはないため候補ナンバー消去
+*/
+			next
+			// ボックス内を検索			
+			for x, x0, x0+3
+				if x-x0 == dx : _continue // 対象ボックス垂直ラインは含めない
+				for y, y0, y0+3
+					change_bit = getChangeBit(x, y, box_vertical(dx)) // データ変更があるビットを取得する
+//					if isEntered(x, y) : change_bit = 0 // 入力済みマスの場合はデータ変更があってもビットを立てない					
+//					if change_bit != 0 : bChanged = 1 // 変更がある場合はフラグを立てる
+					if (change_bit != 0) && isNotEntered(x, y) : bChanged = 1 // 未入力マスへの変更がある場合はフラグを立てる
+					delete_flag(x, y) |= change_bit // 削除される候補のビットを立てる
+					//one_cycle_delete_flag(x, y) |= delete_flag(x, y)
+					/*
+					if isNotSearchingMode : _continue // 探索中は下の判定処理を行う
+					if isDefinedAfterDelete(x, y, delete_flag(x, y)) == 0 : _continue // 確定入力できるならロジック処理を停止、できないなら継続
+					ret_x = x
+					ret_y = y
+//					bChangedTypeB = 1
+					if bChanged == 1 : setLogicFlagBoxVertical x0+dx, y0 // 変更ありなら前提ロジックフラグ更新
+					return 1 					
+//					data(x, y) |= box_vertical(dx) // ボックス垂直ライン上で候補ナンバーが必ず使用されるため、同じボックス内で使用されることはないため候補ナンバー消去
+*/
+				next
+			next
+			if bChanged == 1 {
+				for box_line_num_index, 0, box_line_num_cnt
+					num = box_line_num(box_line_num_index)
+					setLogicFlagBoxVertical x0+dx, y0 // 変更ありなら前提ロジックフラグ更新
+				next
+			}
+		next
+		/********************************************************************************************************************************************************************************/
+	next
+
+//	bChangedTypeB = DeleteFlagData() // 削除フラグに従ってワーキングデータのフラグを削除する
+	
+	return
+
+// 前提ロジック強調フラグ更新(ボックス横ライン)
+#deffunc setLogicFlagBoxHorizon int logic_horizon_x, int logic_horizon_y
+	if isNotEntered(logic_horizon_x,   logic_horizon_y) : logic_flag(logic_horizon_x,   logic_horizon_y) |= 1<<num
+	if isNotEntered(logic_horizon_x+1, logic_horizon_y) : logic_flag(logic_horizon_x+1, logic_horizon_y) |= 1<<num
+	if isNotEntered(logic_horizon_x+2, logic_horizon_y) : logic_flag(logic_horizon_x+2, logic_horizon_y) |= 1<<num
+	return
+
+// 前提ロジック強調フラグ更新(ボックス縦ライン)
+#deffunc setLogicFlagBoxVertical int logic_vertical_x, int logic_vertical_y
+	if isNotEntered(logic_vertical_x, logic_vertical_y)   : logic_flag(logic_vertical_x, logic_vertical_y)   |= 1<<num
+	if isNotEntered(logic_vertical_x, logic_vertical_y+1) : logic_flag(logic_vertical_x, logic_vertical_y+1) |= 1<<num
+	if isNotEntered(logic_vertical_x, logic_vertical_y+2) : logic_flag(logic_vertical_x, logic_vertical_y+2) |= 1<<num
+	return
+
+// 削除フラグにしたがってワーキングデータのフラグを削除する
+#defcfunc DeleteFlagData
+	bChanged = 0
+	for x, 0, 9
+		for y, 0, 9
+			node_logic_flag(x, y)  |= logic_flag(x, y)  // ノード単位のロジック強調フラグを更新
+			if delete_flag(x, y) == 0 : _continue // 削除対象がない
+			node_delete_flag(x, y) |= delete_flag(x, y) // ノード単位の削除フラグを更新
+			if isNotEntered(x, y) : bChanged = 1 // 未入力マスに削除対象ありのフラグを立てる
+			data(x, y) |= delete_flag(x, y) // 削除フラグのビットが立っている位置と同じ位置のビットを立てる(使用済みとなるため候補が削除される)
+			for num, 1, 10
+				if delete_flag(x, y)&(USED_BIT<<num) {
+					RenewLogicData x, y, num
+				}
+			next
+		next
+	next
+	return bChanged
+
+// 任意の位置(x,y)に任意のナンバー(num)を入力する処理
+#deffunc InputNumber int input_x, int input_y, int input_num
+	switch game_mode
+		// 問題自動作成及び解答探索は両方とも同じ探索処理を行う(※バッティング数値が入力されることはない※既にある数値を書き換えることがないため高速処理可能)
+		case MODE_MAKING
+		case MODE_AUTO
+		case MODE_MAKE_CLEAR
+			data(input_x, input_y) |= input_num // ナンバー入力(※フラグ維持)
+			RenewUsedData input_x, input_y, input_num // 使用済みフラグ更新(※高速処理、フラグの状態が正しい必要がある)
+//			dim logic_flag, 9, 9  // 表示用ロジックフラグ初期化
+//			dim delete_flag, 9, 9 // 表示用候補削除フラグ				
+			return
+		// プレイ時手動入力(※既にある数値を書き換え可能、ただし初期配置は不可)
+		// プレイ時自動入力(※自動解答入力機能)
+		case MODE_PLAY
+			if bDispAnswer : return // 答え表示状態なら入力拒否
+			if isStartEntered(input_x, input_y) : return // 初期ナンバーは編集不可
+			if getNumber(input_x, input_y) == input_num : return // 同じナンバーの入力は拒否
+			data(input_x, input_y) = input_num // ナンバー入力(※フラグ消去)
+			InitUsedData // 使用済みフラグ更新(※低速処理、フラグの状態にかかわらずナンバーのみから更新できる)
+			// 最終手記録
+			answer_px = input_x
+			answer_py = input_y
+			if isFullInput() { // 全てのマスを入力済み
+				if isFalseCheck() == 0 { game_mode = MODE_CLEAR }     // 全てのマスを埋めクリア
+				else                   { game_mode = MODE_NOT_CLEAR } // 全てのマスを埋め間違い
+			}
+			if move_count < MOVE_MAX : move_count++ // 履歴位置インクリメント
+			move_max_count = move_count             // 履歴最新位置更新
+			SaveMoveData                            // 履歴データ保存
+			for x, 0, 9
+				for y, 0, 9
+					move_input_used(move_count, x, y) = move_input_used(move_count-1, x, y)
+				next
+			next
+			return
+		// 編集時手動入力(※既にある数値を書き換え可能、履歴は残らない)
+		case MODE_EDIT
+			if getNumber(input_x, input_y) == input_num : return // 同じナンバーの入力は拒否
+			data(input_x, input_y) = input_num // ナンバー入力(※フラグ消去)			
+			InitUsedData // 使用済みフラグ更新(※低速処理、フラグの状態にかかわらずナンバーのみから更新できる)
+			return
+		case MODE_CLEAR
+		case MODE_NOT_CLEAR
+			return
+	swend
+
+	return
+
+
+// 使用済みフラグ全消去
+#deffunc ClearUsedData
+	for used_x, 0, 9
+		for used_y, 0, 9
+			data(used_x, used_y) &= NUMBER_BIT
+		next
+	next
+	return
+	
+// データ上に入力されているナンバーから使用済みフラグ立てデータを初期化する(※使用済みフラグを０から生成のため低速)
+#deffunc InitUsedData
+	for used_x, 0, 9
+		used_x0 = used_x/3*3 // ボックスの左上x座標
+		for used_y, 0, 9
+			used_y0 = used_y/3*3 // ボックスの左上y座標
+			used_horizon_flag = 0  // 水平ラインの使用済みフラグ(対象データ(x,y)自身は含めない)
+			used_vertical_flag = 0 // 垂直ラインの使用済みフラグ(対象データ(x,y)自身は含めない)
+			used_box_flag = 0   // ボックスの使用済みフラグ(対象データ(x,y)自身は含めない)
+			for used_i, 0, 9
+				used_dx = used_i\3 // ボックスの左上からのx座標
+				used_dy = used_i/3 // ボックスの左上からのy座標
+				// 水平、垂直、ボックスから影響与える使用済み数字のビットを、対象データに対して立てる
+				// ※未入力状態(=0)の場合でもALL_USED_BITの論理積を取っているため、計算結果が0となり問題はない
+				if used_i != used_x : used_horizon_flag |= (USED_BIT<<getNumber(used_i, used_y))&ALL_USED_BIT
+				if used_i != used_y : used_vertical_flag |= (USED_BIT<<getNumber(used_x, used_i))&ALL_USED_BIT
+				if (used_x0+used_dx != used_x) || (used_y0+used_dy != used_y) : used_box_flag |= (USED_BIT<<getNumber(used_x0+used_dx, used_y0+used_dy))&ALL_USED_BIT
+			next
+			data(used_x, used_y) &= NUMBER_BIT // 使用済みフラグクリア
+			data(used_x, used_y) |= used_horizon_flag | used_vertical_flag | used_box_flag // 使用済みフラグ更新
+		next
+	next
+//	dim logic_flag, 9, 9  // 表示強調用ロジックフラグ初期化
+	return
+
+// 任意の位置(x,y)にナンバー(num)を入力した場合の使用済みフラグ更新処理(※使用済みフラグの変更部のみ更新。０から生成より高速)
+#deffunc RenewUsedData int r_used_x, int r_used_y, int r_used_num
+	r_used_x0 = r_used_x/3*3 // ボックスの左上x座標
+	r_used_y0 = r_used_y/3*3 // ボックスの左上y座標		
+	for r_used_i, 0, 9
+		r_used_dx = r_used_i\3 // ボックスの左上からのx座標
+		r_used_dy = r_used_i/3 // ボックスの左上からのy座標
+		// 入力データ(x,y)の使用数字が影響を与える、水平、垂直、ボックスに対してビットを立てる
+		// ※未入力状態(=0)の場合でもALL_USED_BITの論理積を取っているため、計算結果が0となり問題はない
+		if r_used_i != r_used_x : data(r_used_i, r_used_y) |= (USED_BIT<<r_used_num)&ALL_USED_BIT
+		if r_used_i != r_used_y : data(r_used_x, r_used_i) |= (USED_BIT<<r_used_num)&ALL_USED_BIT
+		if (r_used_x0+r_used_dx != r_used_x) || (r_used_y0+r_used_dy != r_used_y) : data(r_used_x0+r_used_dx, r_used_y0+r_used_dy) |= (USED_BIT<<r_used_num)&ALL_USED_BIT
+	next
+	return
+
+// 全てのマスを入力しているかどうかチェック
+#defcfunc isFullInput
+	for full_x, 0, 9
+		for full_y, 0, 9
+			if isNotEntered(full_x, full_y) : return 0
+		next
+	next
+	return 1
+	
+// 矛盾データがないかチェック
+#defcfunc isFalseCheck
+	for false_x, 0, 9
+		for false_y, 0, 9
+			if isFalse(false_x, false_y) : return 1
+		next
+	next
+	return 0
+
+// 任意の座標に削除フラグを適応したとき、入力候補が1つしかない(1つの候補のナンバーを取得してくる)
+#defcfunc isDefinedAfterDelete int def_x, int def_y, int def_flag
+	if        (data(def_x, def_y)|def_flag) == DEF_1_BIT { ret_num = 1 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_2_BIT { ret_num = 2 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_3_BIT { ret_num = 3 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_4_BIT { ret_num = 4 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_5_BIT { ret_num = 5 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_6_BIT { ret_num = 6 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_7_BIT { ret_num = 7 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_8_BIT { ret_num = 8 }
+	else : if (data(def_x, def_y)|def_flag) == DEF_9_BIT { ret_num = 9 }
+	else                                                 { return 0    } // 確定ナンバーなし
+	return 1 // 確定ナンバーあり
+
+// 同じマスに入力候補が1つしかない(全マス検索)
+#defcfunc isMassOneCandiate
+	for mass_x, 0, 9
+		for mass_y, 0, 9
+			if isDefinedAfterDelete(mass_x, mass_y, 0) == 0 : _continue // 入力できる確定ナンバーがない場合はスキップ
+			// 確定済みナンバー発見(1マスに候補1つのみ)
+			// 条件を満たした座標とナンバーを取得
+			ret_x = mass_x
+			ret_y = mass_y
+			return 1
+		next
+	next
+	return 0
+
+// 同じ水平ライン内で特定のナンバーが1つしか入力候補がない(全マス検索)
+#defcfunc isHorizonOneCandiate
+	for horizon_y, 0, 9 // 水平ラインの種類
+		for horizon_num, 1, 10 // 特定ナンバーを総当たりで検索	
+			horizon_num_cnt = 0 // 入力候補数
+			horizon_flag = 0 // 水平ラインの使用済みフラグ(対象データ(x,y)自身を含める)
+			for horizon_x, 0, 9 // 水平ラインの要素検索
+				if isPossible(horizon_x, horizon_y, horizon_num) { // 入力候補あり
+					horizon_num_cnt++
+					if horizon_num_cnt > 1 : _break // 2つ以上は検索しない
+					// 条件を満たした座標とナンバーを返す
+					ret_x = horizon_x
+					ret_y = horizon_y
+					ret_num = horizon_num
+				}
+			next
+			if horizon_num_cnt == 1 : return 1 // 水平ライン内でこのナンバーの候補が1つしかない
+		next
+	next
+	return 0
+	
+// 同じ垂直ライン内で特定のナンバーが1つしか入力候補がない(全マス検索)
+#defcfunc isVerticalOneCandiate
+	for vertical_x, 0, 9 // 垂直ラインの種類
+		for vertical_num, 1, 10 // 特定ナンバーを総当たりで検索
+			vertical_num_cnt = 0 // 入力候補数
+			vertical_flag = 0 // 垂直ラインの使用済みフラグ(対象データ(x,y)自身を含める)
+			for vertical_y, 0, 9 // 垂直ラインの要素検索
+				if isPossible(vertical_x, vertical_y, vertical_num) { // 入力候補あり
+					vertical_num_cnt++
+					if vertical_num_cnt > 1 : _break // 2つ以上は検索しない
+					// 条件を満たした座標とナンバーを返す
+					ret_x = vertical_x
+					ret_y = vertical_y
+					ret_num = vertical_num
+				}
+			next
+			if vertical_num_cnt == 1 : return 1 // 垂直ライン内でこのナンバーの候補が1つしかない
+		next
+	next
+	return 0
+	
+// 同じボックス内で特定のナンバーが1つしか入力候補がない(全マス検索)
+#defcfunc isBoxOneCandiate
+	for box_num, 1, 10
+		for box_i, 0, 9
+			box_x0 = box_i\3*3 // ボックスの左上x座標
+			box_y0 = box_i/3*3 // ボックスの左上x座標
+			box_num_cnt = 0 // 入力候補数
+			for box_dx, 0, 3
+				for box_dy, 0, 3
+					if isPossible(box_x0+box_dx, box_y0+box_dy, box_num) { // 入力候補あり
+						box_num_cnt++
+						ret_x = box_x0+box_dx
+						ret_y = box_y0+box_dy
+						ret_num = box_num // 条件を満たしたナンバーを返す
+					}
+					if box_num_cnt > 1 : _break // 2つ以上は検索しない
+				next
+				if box_num_cnt > 1 : _break // 2つ以上は検索しない
+			next
+			if box_num_cnt == 1 : return 1 // ボックス内でこのナンバーの候補が1つしかない
+		next
+	next
+	return 0
+
+////////////////////////////////// debug
+// 確定ナンバーがある場合
+#defcfunc isDefineOne int one_x, int one_y, int one_num
+	// 1マス内を検索
+	if isDefinedAfterDelete(one_x, one_y, 0) {
+		if ret_num == one_num : return 1
+	}
+	
+	one_x0 = one_x/3*3 // ボックスの左上x座標
+	one_y0 = one_y/3*3 // ボックスの左上y座標		
+	// 水平方向検索
+	for one_i, 0, 9
+		if one_i == one_x : _continue
+		if isPossible(one_i, one_y, one_num) : _break
+	next
+	if one_i == 9 : return 1
+	
+	// 垂直方向検索
+	for one_i, 0, 9
+		if one_i == one_y : _continue
+		if isPossible(one_x, one_i, one_num) : _break
+	next
+	if one_i == 9 : return 1
+	
+	// ボックス検索
+	for one_i, 0, 9
+		one_dx = one_i\3 // ボックスの左上からのx座標
+		one_dy = one_i/3 // ボックスの左上からのy座標
+		if (one_x0+one_dx == one_x) && (one_y0+one_dy == one_y) : _continue
+		if isPossible(one_x0+one_dx, one_y0+one_dy, one_num) : _break
+	next
+	if one_i == 9 : return 1
+
+	return 0
+
+// マウスイベント発生処理(クリックした瞬間だけ発生)
+#deffunc CheckMouseEvent
+	getkey left_click,  1
+	getkey right_click, 2
+	bLeftClickEvent = 0  // 左クリックイベント
+	bRightClickEvent = 0 // 右クリックイベント
+	bLeftClickUpEvent = 0 // 左クリックアップイベント
+	if bLeftClickHold == 0 { // 前回処理でホールドされていない
+		if left_click == 1 { // 初めて押された
+			bLeftClickHold = 1 // ホールドフラグ立てる
+			bLeftClickEvent = 1 // 1ホールド1回のイベント発生
+		}
+	}
+	else { // 前回処理でホールドされている
+		if left_click == 0 {
+			bLeftClickHold = 0 // 離されればホールドフラグ解除
+			bLeftClickUpEvent = 1 // 左クリックアップイベント発生
+		}
+	}
+	if bRightClickHold == 0 { // 前回処理でホールドされていない
+		if right_click == 1 { // 初めて押された
+			bRightClickHold = 1 // ホールドフラグ立てる
+			bRightClickEvent = 1 // 1ホールド1回のイベント発生
+		}
+	}
+	else { // 前回処理でホールドされている
+		if right_click == 0 : bRightClickHold = 0 // 離されればホールドフラグ解除
+	}
+	return
+
+// 数字キー及びDEL,BACKSPACE,エンターキーイベント発生処理(押した瞬間だけ発生)
+#deffunc CheckKeyEvent
+	dim key, 20
+	for n, 0, 10
+		getkey key(n), 48+n
+		getkey key(n+10), 96+n // テンキー
+	next
+	getkey bs_key, 8     //BACKSPACEキー
+	getkey del_key, 46   //DELETEキー
+	getkey enter_key, 13 // エンターキー
+	iKeyNumber = -1 // 入力キーイベント
+	bEnterKey = -1  // エンターキーイベント
+	if bKeyHold == 0 { // 前回処理でホールドされていない
+		for n, 0, 10
+			if (key(n) == 1) || (key(n+10) == 1) { // 初めて押された
+				bKeyHold = 1   // ホールドフラグ立てる
+				iKeyNumber = n // 1ホールド1回のイベント発生
+			}
+		next
+		if (bs_key == 1) || (del_key == 1) { // 初めて押された
+			bKeyHold = 1   // ホールドフラグ立てる
+			iKeyNumber = 0 // 1ホールド1回のイベント発生
+		}
+		if (enter_key == 1) { // 初めて押された
+			bKeyHold = 1   // ホールドフラグ立てる
+			bEnterKey = 1  // 1ホールド1回のイベント発生
+		}
+	}
+	else { // 前回処理でホールドされている
+		for n, 0, 10
+			if key(n) == 1 : _break
+			if key(n+10) == 1 : _break // テンキー
+		next
+		if (n == 10) && (bs_key == 0) && (del_key == 0) && (enter_key == 0) : bKeyHold = 0 // 全ての受付キーが離されればホールドフラグ解除
+	}
+	return
+
+// カーソルキーイベント発生処理(押した瞬間発生し、押し続けると長い待機時間(1次受付拒否時間)の後、短い時間(2次受付拒否時間)間隔に発生)
+#deffunc CheckCurKeyEvent
+	dim key_cur, 4
+	getkey key_cur(CUR_LEFT),  37
+	getkey key_cur(CUR_UP),    38
+	getkey key_cur(CUR_RIGHT), 39
+	getkey key_cur(CUR_DOWN),  40
+	for n, 0, 4
+		// キーが離されれば
+		if key_cur(n) == 0 : iCurAccept(n) = 0 // 0次受付へ
+	next
+	dim bCurEvent, 4
+	for n, 0, 4
+		if        iCurAccept(n) == 0 { // 0次受付
+			if key_cur(n) == 1 { // キーが初めて押されれば
+				iCurAccept(n) = 1   // 1次受付へ
+				bCurEvent(n) = 1    // キーイベント発生
+				iCurRejectT1(n) = 0 // 1次受付拒否時間初期化
+			}			
+		}
+		else : if iCurAccept(n) == 1 { // 1次受付
+			iCurRejectT1(n)++ // 1次受付拒否時間計測
+			if iCurRejectT1(n) > CUR_REJECT_TIME1 { // 1次受付拒否時間経過
+				if key_cur(n) == 1 { // キーがホールドされていれば
+					iCurAccept(n) = 2   // 2次受付へ
+					iCurRejectT2(n) = 0 // 2次受付拒否時間初期化
+				}
+			}		
+		}
+		else : if iCurAccept(n) == 2 { // 2次受付
+			iCurRejectT2(n)++ // 2次受付拒否時間計測
+			if iCurRejectT2(n) > CUR_REJECT_TIME2 { // 2次受付拒否時間経過
+				if key_cur(n) == 1 { // キーがホールドされていれば
+					iCurRejectT2(n) = 0 // 2拒受付否時間初期化
+					bCurEvent(n) = 1    // キーイベント発生
+				}
+			}
+		}
+	next
+	return
+
+// ボタンのクリックイベント処理
+#deffunc ButtonClickEvent
+	if bLeftClickEvent == 1 { // どのボタンがクリックダウンされたか(クリックされたボタンのイベント番号を記録)
+		if       (isMouseArea(PLAY_BUTTON_POS_X, PLAY_BUTTON_POS_Y, PLAY_BUTTON_WIDTH, PLAY_BUTTON_HEIGHT))                                                     { iButtonEvent = BUTTON_EVENT_PLAY }
+		else : if(isMouseArea(EDIT_BUTTON_POS_X, EDIT_BUTTON_POS_Y, EDIT_BUTTON_WIDTH, EDIT_BUTTON_HEIGHT))                                                     { iButtonEvent = BUTTON_EVENT_EDIT }
+		else : if(isMouseArea(AUTO_BUTTON_POS_X, AUTO_BUTTON_POS_Y, AUTO_BUTTON_WIDTH, AUTO_BUTTON_HEIGHT) && isPlayMode())                                     { iButtonEvent = BUTTON_EVENT_AUTO }
+		else : if(isMouseArea(NEW_BUTTON_POS_X, NEW_BUTTON_POS_Y, NEW_BUTTON_WIDTH, NEW_BUTTON_HEIGHT) && isEditMode())                                         { iButtonEvent = BUTTON_EVENT_NEW }
+		else : if(isMouseArea(MAKE_CANDIATE_BUTTON_POS_X, MAKE_CANDIATE_BUTTON_POS_Y, MAKE_CANDIATE_BUTTON_WIDTH, MAKE_CANDIATE_BUTTON_HEIGHT) && isEditMode()) { iButtonEvent = BUTTON_EVENT_MAKE_CANDIATE }
+		else : if(isMouseArea(MAKE_PROBLEM_BUTTON_POS_X, MAKE_PROBLEM_BUTTON_POS_Y, MAKE_PROBLEM_BUTTON_WIDTH, MAKE_PROBLEM_BUTTON_HEIGHT) && isEditMode())     { iButtonEvent = BUTTON_EVENT_MAKE_PROBLEM }
+		else : if(isMouseArea(LEVEL_DOWN_BUTTON_POS_X, LEVEL_DOWN_BUTTON_POS_Y, LEVEL_DOWN_BUTTON_WIDTH, LEVEL_DOWN_BUTTON_HEIGHT))                             { iButtonEvent = BUTTON_EVENT_LEVEL_DOWN }
+		else : if(isMouseArea(LEVEL_UP_BUTTON_POS_X, LEVEL_UP_BUTTON_POS_Y, LEVEL_UP_BUTTON_WIDTH, LEVEL_UP_BUTTON_HEIGHT))                                     { iButtonEvent = BUTTON_EVENT_LEVEL_UP }
+		else : if(isMouseArea(ANALYZE_BUTTON_POS_X, ANALYZE_BUTTON_POS_Y, ANALYZE_BUTTON_WIDTH, ANALYZE_BUTTON_HEIGHT))                                         { iButtonEvent = BUTTON_EVENT_ANALYZE }
+		else : if(isMouseArea(ANSWER_BUTTON_POS_X, ANSWER_BUTTON_POS_Y, ANSWER_BUTTON_WIDTH, ANSWER_BUTTON_HEIGHT))                                             { iButtonEvent = BUTTON_EVENT_ANSWER }
+		else : if(isMouseArea(CHECK_BUTTON_POS_X, CHECK_BUTTON_POS_Y, CHECK_BUTTON_WIDTH, CHECK_BUTTON_HEIGHT))                                                 { iButtonEvent = BUTTON_EVENT_CHECK }
+		else : if(isMouseArea(HINT1_BUTTON_POS_X, HINT1_BUTTON_POS_Y, HINT1_BUTTON_WIDTH, HINT1_BUTTON_HEIGHT))                                                 { iButtonEvent = BUTTON_EVENT_HINT1 }
+		else : if(isMouseArea(HINT2_BUTTON_POS_X, HINT2_BUTTON_POS_Y, HINT2_BUTTON_WIDTH, HINT2_BUTTON_HEIGHT))                                                 { iButtonEvent = BUTTON_EVENT_HINT2 }
+		else : if(isMouseArea(LOGIC_BUTTON_POS_X, LOGIC_BUTTON_POS_Y, LOGIC_BUTTON_WIDTH, LOGIC_BUTTON_HEIGHT) && iDispHint2 == HINT2_MANUAL)                   { iButtonEvent = BUTTON_EVENT_LOGIC }
+		else : if(isMouseArea(LOGIC_BACK_BUTTON_POS_X, LOGIC_BACK_BUTTON_POS_Y, LOGIC_BACK_BUTTON_WIDTH, LOGIC_BACK_BUTTON_HEIGHT))                             { iButtonEvent = BUTTON_EVENT_LOGIC_BACK }
+		else : if(isMouseArea(LOGIC_NEXT_BUTTON_POS_X, LOGIC_NEXT_BUTTON_POS_Y, LOGIC_NEXT_BUTTON_WIDTH, HINT2_BUTTON_HEIGHT))                                  { iButtonEvent = BUTTON_EVENT_LOGIC_NEXT }		
+		else : if(isMouseArea(SAVE_BUTTON_POS_X, SAVE_BUTTON_POS_Y, SAVE_BUTTON_WIDTH, SAVE_BUTTON_HEIGHT))                                                     { iButtonEvent = BUTTON_EVENT_SAVE }
+		else : if(isMouseArea(LOAD_BUTTON_POS_X, LOAD_BUTTON_POS_Y, LOAD_BUTTON_WIDTH, LOAD_BUTTON_HEIGHT))                                                     { iButtonEvent = BUTTON_EVENT_LOAD }
+		else : if(isMouseArea(MOVE_BUTTON_POS_X, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT) && (isPlayMode() || isFullModeClear()))              { iButtonEvent = BUTTON_EVENT_MOVE_BEGIN }
+		else : if(isMouseArea(MOVE_BUTTON_POS_X+MOVE_BUTTON_DISTANCE_X, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT) && (isPlayMode() || isFullModeClear())) { iButtonEvent = BUTTON_EVENT_MOVE_BACK }
+		else : if(isMouseArea(MOVE_BUTTON_POS_X+MOVE_BUTTON_DISTANCE_X*2, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT) && isPlayMode())            { iButtonEvent = BUTTON_EVENT_MOVE_NEXT }
+		else : if(isMouseArea(MOVE_BUTTON_POS_X+MOVE_BUTTON_DISTANCE_X*3, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT) && isPlayMode())            { iButtonEvent = BUTTON_EVENT_MOVE_END }
+		else : if(isMouseArea(MARK_BUTTON_POS_X, MARK_BUTTON_POS_Y, MARK_BUTTON_WIDTH, MARK_BUTTON_HEIGHT))                                                     { iButtonEvent = BUTTON_EVENT_MARK }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT))                            { iButtonEvent = BUTTON_EVENT_1 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT))   { iButtonEvent = BUTTON_EVENT_2 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*2, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_3 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*3, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_4 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*4, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_5 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*5, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_6 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*6, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_7 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*7, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_8 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*8, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_9 }
+		else : if(isMouseArea(NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*9, NUMBER_BUTTON_POS_Y, DELETE_BUTTON_WIDTH, DELETE_BUTTON_HEIGHT)) { iButtonEvent = BUTTON_EVENT_0 }
+	}
+	else : if bLeftClickUpEvent == 1 { // クリックアップしたらクリックダウンされたボタンがある場合は、そのボタンを実行
+		switch iButtonEvent
+			case BUTTON_EVENT_PLAY
+				iButtonEvent = 0
+				ModeChangePlay
+				swbreak
+			case BUTTON_EVENT_EDIT
+				iButtonEvent = 0
+				ModeChangeEdit
+				swbreak
+			case BUTTON_EVENT_AUTO
+				iButtonEvent = 0
+				AutoSudoku
+				swbreak
+			case BUTTON_EVENT_NEW
+				iButtonEvent = 0
+				NewSudoku
+				swbreak
+			case BUTTON_EVENT_MAKE_CANDIATE
+				iButtonEvent = 0
+				swbreak
+			case BUTTON_EVENT_MAKE_PROBLEM
+				iButtonEvent = 0
+				MakeSudoku
+				swbreak
+			case BUTTON_EVENT_LEVEL_DOWN
+				iButtonEvent = 0
+				if iLevel == 1 { iLevel = 5 }
+				else           { iLevel-- }
+				swbreak
+			case BUTTON_EVENT_LEVEL_UP
+				iButtonEvent = 0
+				if iLevel == 5 { iLevel = 1 }
+				else           { iLevel++ }
+				swbreak
+			case BUTTON_EVENT_ANALYZE
+				iButtonEvent = 0
+				AnalyzeSudoku
+				swbreak
+			case BUTTON_EVENT_ANSWER
+				iButtonEvent = 0
+				AnswerSudoku
+				swbreak
+			case BUTTON_EVENT_CHECK
+				iButtonEvent = 0
+				CheckSudoku
+				swbreak
+			case BUTTON_EVENT_HINT1
+				iButtonEvent = 0
+				Hint1Sudoku
+				swbreak
+			case BUTTON_EVENT_HINT2
+				iButtonEvent = 0
+				Hint2Sudoku
+				swbreak
+			case BUTTON_EVENT_LOGIC
+				iButtonEvent = 0
+				LogicSudoku
+				swbreak
+			case BUTTON_EVENT_LOGIC_BACK			
+				iButtonEvent = 0
+				BackLogicType
+				swbreak
+			case BUTTON_EVENT_LOGIC_NEXT
+				iButtonEvent = 0
+				NextLogicType
+				swbreak
+			case BUTTON_EVENT_SAVE
+				iButtonEvent = 0
+				SaveSudoku
+				swbreak
+			case BUTTON_EVENT_LOAD
+				iButtonEvent = 0
+				LoadSudoku
+				swbreak
+			case BUTTON_EVENT_MOVE_BEGIN
+				iButtonEvent = 0
+				MoveBegin
+				swbreak
+			case BUTTON_EVENT_MOVE_END
+				iButtonEvent = 0
+				MoveEnd
+				swbreak
+			case BUTTON_EVENT_MOVE_NEXT
+				iButtonEvent = 0
+				MoveNext
+				swbreak
+			case BUTTON_EVENT_MOVE_BACK
+				iButtonEvent = 0
+				MoveBack
+				swbreak
+			case BUTTON_EVENT_MARK
+				iButtonEvent = 0
+				MarkSudoku
+				swbreak
+			case BUTTON_EVENT_1
+				iButtonEvent = 0
+				PressNumber 1
+				swbreak
+			case BUTTON_EVENT_2
+				iButtonEvent = 0
+				PressNumber 2
+				swbreak
+			case BUTTON_EVENT_3
+				iButtonEvent = 0
+				PressNumber 3
+				swbreak
+			case BUTTON_EVENT_4
+				iButtonEvent = 0
+				PressNumber 4
+				swbreak
+			case BUTTON_EVENT_5
+				iButtonEvent = 0
+				PressNumber 5
+				swbreak
+			case BUTTON_EVENT_6
+				iButtonEvent = 0
+				PressNumber 6
+				swbreak
+			case BUTTON_EVENT_7
+				iButtonEvent = 0
+				PressNumber 7
+				swbreak
+			case BUTTON_EVENT_8
+				iButtonEvent = 0
+				PressNumber 8
+				swbreak
+			case BUTTON_EVENT_9
+				iButtonEvent = 0
+				PressNumber 9
+				swbreak
+			case BUTTON_EVENT_0
+				iButtonEvent = 0
+				PressNumber 0
+				swbreak
+		swend
+	}
+	
+	return
+
+// カーソルキー移動処理(マウスから)
+#deffunc MoveCursorFromMouse
+	// 9×9の入力マスの座標
+	cur_x = (mousex-DRAW_POS_X)/MASS_LENGTH
+	cur_y = (mousey-DRAW_POS_Y)/MASS_LENGTH
+	// 9×9の入力マスの中の9×9の候補ナンバー座標
+	cur_x2 = ((mousex-DRAW_POS_X)-cur_x*MASS_LENGTH)/(MASS_LENGTH/3+1)
+	cur_y2 = ((mousey-DRAW_POS_Y)-cur_y*MASS_LENGTH)/(MASS_LENGTH/3+1)
+	// 強調するナンバーの取得(マウス座標)
+	if bDispAnswer { point_up_number = getClearNumber(cur_x, cur_y) }
+	else           { point_up_number = getNumber(cur_x, cur_y) }
+	if (iDispHint2 != HINT2_OFF) && (point_up_number == 0){
+		point_up_number == cur_x2+1+cur_y2*3 // 強調するナンバーの取得(マウス座標)
+	}
+	return
+	
+// カーソルキー移動処理(キーから)
+#deffunc MoveCursorFromKey
+	if iCurMode == CURSOR_CANDIATE { // 候補入力モード時	
+		if bCurEvent(CUR_LEFT) == 1 {
+			if cur_x2 > 0 { cur_x2-- }
+			else {
+				if cur_x > 0 { cur_x-- }
+				else         { cur_x = 8 } // 循環カーソル
+				cur_x2 = 2
+			}
+		}
+		if bCurEvent(CUR_UP) == 1 {
+			if cur_y2 > 0 { cur_y2-- }
+			else {
+				if cur_y > 0 { cur_y-- }
+				else         { cur_y = 8 } // 循環カーソル
+				cur_y2 = 2
+			}
+		}
+		if bCurEvent(CUR_RIGHT) == 1 {
+			if cur_x2 < 2 { cur_x2++ }
+			else {
+				if cur_x < 8 { cur_x++ }
+				else         { cur_x = 0 } // 循環カーソル
+				cur_x2 = 0
+			}
+		}
+		if bCurEvent(CUR_DOWN) == 1 {
+			if cur_y2 < 2 { cur_y2++ }
+			else {
+				if cur_y < 8 { cur_y++ }
+				else         { cur_y = 0 } // 循環カーソル
+				cur_y2=0
+			}
+		}
+	}
+	else {
+		if bCurEvent(CUR_LEFT) == 1 {
+			if cur_x > 0 { cur_x-- }
+			else         { cur_x=8 } // 循環カーソル
+		}
+		if bCurEvent(CUR_UP) == 1 {
+			if cur_y > 0 { cur_y-- }
+			else         { cur_y=8 } // 循環カーソル
+		}
+		if bCurEvent(CUR_RIGHT) == 1 {
+			if cur_x < 8 { cur_x++ }
+			else         { cur_x=0 } // 循環カーソル
+		}
+		if bCurEvent(CUR_DOWN) == 1 {
+			if cur_y < 8 { cur_y++ }
+			else         { cur_y=0 } // 循環カーソル
+		}
+	}
+
+	// 強調するナンバーの取得(カーソルキー)
+	if bDispAnswer { point_up_number = getClearNumber(cur_x, cur_y) }
+	else           { point_up_number = getNumber(cur_x, cur_y) }		
+	
+	return
+
+// カーソル自動送り処理
+#deffunc AutoMoveCursor
+	if isNotEditMode() : return // 編集モード時以外は処理しない
+	if isMouseArea(DRAW_POS_X, DRAW_POS_Y, MASS9_LENGTH, MASS9_LENGTH) && (bLockCursor == 1) : return // マウス領域内かつカーソルアンロック時は処理しない
+	// 問題入力しやすいようにカーソル自動送り
+	if cur_x < 8 { cur_x++ }
+	else {
+		cur_x=0 // 循環カーソル
+		if cur_y < 8 { cur_y++ }
+		else         { cur_y=0 } // 循環カーソル
+	}
+	return
+	
+// キー及びマウス入力処理
+#deffunc KeyMouseInput
+
+	CheckMouseEvent     // マウスイベント発生をチェック
+	CheckKeyEvent       // 入力キーイベント発生をチェック
+	CheckCurKeyEvent    // カーソルキーイベント発生をチェック
+
+	ButtonClickEvent // ボタンイベントの処理
+
+	if bLockCursor == 1 { // カーソルロックされている
+		if bLeftClickEvent == 1 { // 左クリックイベント発生
+			bLockCursor = 0 // カーソルロック解除
+		}
+	}
+	else : if isMouseArea(DRAW_POS_X, DRAW_POS_Y, MASS9_LENGTH, MASS9_LENGTH) { //マウス座標がマスの範囲内の場合はカーソルキー入力無効
+		MoveCursorFromMouse // カーソル移動処理
+		if bLeftClickEvent == 1 {
+			if iCurMode == CURSOR_CANDIATE { changePossibleInput(cur_x, cur_y, cur_x2+cur_y2*3+1) } // 左クリックで候補をON-OFF
+			else                           { bLockCursor = 1 } // カーソルロック開始
+		}
+	}
+	else { // マウス座標がマスの範囲外の場合はカーソルキー入力受付		
+		MoveCursorFromKey // カーソル移動処理
+	}
+
+	if iCurMode == CURSOR_CANDIATE { // 候補入力モード時		
+		if iDispHint2 == HINT2_MANUAL && ((bRightClickEvent == 1) || (bEnterKey == 1)) : iCurMode = CURSOR_ANSWER // 右クリックまたはエンターキーはカーソルモード切替
+		bLockCursor = 0 // カーソルロックしない
+		if iKeyNumber == -1 : return // キーイベントが発生していない
+		if iKeyNumber == 0 { move_input_used(move_count, cur_x, cur_y) = ALL_USED_BIT } // 削除キーが押された場合は全候補消去する
+		else               { changePossibleInput(cur_x, cur_y, iKeyNumber) } // キー入力で候補をON-OFF
+	}
+	else {
+		if iDispHint2 == HINT2_MANUAL && ((bRightClickEvent == 1) || (bEnterKey == 1)) : iCurMode = CURSOR_CANDIATE // 右クリックまたはエンターキーはカーソルモード切替
+		if iKeyNumber == -1 : return // キーイベントが発生していない
+		InputNumber cur_x, cur_y, iKeyNumber // ナンバー入力(削除ナンバー=0)
+		AutoMoveCursor
+	}
+	
+	return
+
+// 四角ボタン表示
+#deffunc DispBoxButton int button_x, int button_y, int button_w, int button_h, str button_name, int button_font_size, int button_event, int button_enable
+	if iButtonEvent == button_event { color COLOR_WHITE }
+	else                            { color COLOR_GRAY }
+	boxf button_x, button_y, button_x+button_w, button_y+button_h
+	pos button_x+(button_w-button_font_size*strlen(button_name)/2)/2, button_y+(button_h-button_font_size)/2
+	font FONT_NAME, button_font_size
+	if button_enable == 1 { color COLOR_BLACK }
+	else                  { color COLOR_DEEP_GRAY }
+	mes button_name
+	color COLOR_DEEP_GRAY
+	BoxLine button_x, button_y, button_x+button_w, button_y+button_h, BUTTON_EDGE_THICK
+	return
+
+// 左ボタン表示
+#deffunc DispLeftButton int button_x, int button_y, int button_w, int button_h, int button_event
+	if iButtonEvent == button_event { color COLOR_WHITE }
+	else                            { color COLOR_GRAY }
+	d = 1
+	while ((button_x+button_w-d) - (button_x+d) >= 0) && ((button_y+button_h-button_h/4-d) - (button_y+button_h/4+d) >= 0)
+		line button_x+d, button_y+button_h/2, button_x+button_w-d, button_y+button_h/4+d
+		line button_x+button_w-d, button_y+button_h/4+d, button_x+button_w-d, button_y+button_h-button_h/4-d
+		line button_x+button_w-d, button_y+button_h-button_h/4-d, button_x+d, button_y+button_h/2
+		d++
+	wend
+	color COLOR_DEEP_GRAY	
+	line button_x, button_y+button_h/2, button_x+button_w, button_y+button_h/4
+	line button_x+button_w, button_y+button_h/4, button_x+button_w, button_y+button_h-button_h/4
+	line button_x+button_w, button_y+button_h-button_h/4, button_x, button_y+button_h/2
+	return
+
+// 右ボタン表示
+#deffunc DispRightButton int button_x, int button_y, int button_w, int button_h, int button_event
+	if iButtonEvent == button_event { color COLOR_WHITE }
+	else                            { color COLOR_GRAY }
+	d = 1
+	while ((button_x+button_w-d) - (button_x+d) >= 0) && ((button_y+button_h-button_h/4-d) - (button_y+button_h/4+d) >= 0)
+		line button_x+d, button_y+button_h/4+d, button_x+button_w-d, button_y+button_h/2
+		line button_x+button_w-d, button_y+button_h/2, button_x, button_y+button_h-button_h/4-d
+		line button_x+d, button_y+button_h-button_h/4-d, button_x+d, button_y+button_h/4+d
+		d++
+	wend
+	color COLOR_DEEP_GRAY
+	line button_x, button_y+button_h/4, button_x+button_w, button_y+button_h/2
+	line button_x+button_w, button_y+button_h/2, button_x, button_y+button_h-button_h/4
+	line button_x, button_y+button_h-button_h/4, button_x, button_y+button_h/4
+	return
+
+// 丸ボタン表示
+#deffunc DispCircleButton int button_x, int button_y, int button_w, int button_h, str button_name, int button_font_size, int button_event
+	if iButtonEvent == button_event { color COLOR_WHITE }
+	else                            { color COLOR_GRAY }
+	circle button_x, button_y, button_x+button_w, button_y+button_h
+	pos button_x+(button_w-strlen(button_name)*button_font_size/2)/2, button_y+(button_h-button_font_size)/2
+	font FONT_NAME, button_font_size
+	color COLOR_BLACK
+	mes button_name
+	color COLOR_DEEP_GRAY
+	circle button_x, button_y, button_x+button_w, button_y+button_h, 0
+	return
+
+// エリア区分ラインの表示
+#deffunc DispAreaLine
+	color COLOR_BLACK
+	line PLAY_MODE_AREA_POS_X1, PLAY_MODE_AREA_POS_Y1, PLAY_MODE_AREA_POS_X2, PLAY_MODE_AREA_POS_Y1
+	line PLAY_MODE_AREA_POS_X2, PLAY_MODE_AREA_POS_Y1, PLAY_MODE_AREA_POS_X2, PLAY_MODE_AREA_POS_Y2
+	line PLAY_MODE_AREA_POS_X2, PLAY_MODE_AREA_POS_Y2, PLAY_MODE_AREA_POS_X1, PLAY_MODE_AREA_POS_Y2
+	line PLAY_MODE_AREA_POS_X1, PLAY_MODE_AREA_POS_Y2, PLAY_MODE_AREA_POS_X1, PLAY_MODE_AREA_POS_Y1
+	line EDIT_MODE_AREA_POS_X1, EDIT_MODE_AREA_POS_Y1, EDIT_MODE_AREA_POS_X2, EDIT_MODE_AREA_POS_Y1
+	line EDIT_MODE_AREA_POS_X2, EDIT_MODE_AREA_POS_Y1, EDIT_MODE_AREA_POS_X2, EDIT_MODE_AREA_POS_Y2
+	line EDIT_MODE_AREA_POS_X2, EDIT_MODE_AREA_POS_Y2, EDIT_MODE_AREA_POS_X1, EDIT_MODE_AREA_POS_Y2
+	line EDIT_MODE_AREA_POS_X1, EDIT_MODE_AREA_POS_Y2, EDIT_MODE_AREA_POS_X1, EDIT_MODE_AREA_POS_Y1
+	line MAKE_MODE_AREA_POS_X1, MAKE_MODE_AREA_POS_Y1, MAKE_MODE_AREA_POS_X2, MAKE_MODE_AREA_POS_Y1
+	line MAKE_MODE_AREA_POS_X2, MAKE_MODE_AREA_POS_Y1, MAKE_MODE_AREA_POS_X2, MAKE_MODE_AREA_POS_Y2
+	line MAKE_MODE_AREA_POS_X2, MAKE_MODE_AREA_POS_Y2, MAKE_MODE_AREA_POS_X1, MAKE_MODE_AREA_POS_Y2
+	line MAKE_MODE_AREA_POS_X1, MAKE_MODE_AREA_POS_Y2, MAKE_MODE_AREA_POS_X1, MAKE_MODE_AREA_POS_Y1	
+	line SUPPORT_AREA_POS_X1, SUPPORT_AREA_POS_Y1, SUPPORT_AREA_POS_X2, SUPPORT_AREA_POS_Y1
+	line SUPPORT_AREA_POS_X2, SUPPORT_AREA_POS_Y1, SUPPORT_AREA_POS_X2, SUPPORT_AREA_POS_Y2
+	line SUPPORT_AREA_POS_X2, SUPPORT_AREA_POS_Y2, SUPPORT_AREA_POS_X1, SUPPORT_AREA_POS_Y2
+	line SUPPORT_AREA_POS_X1, SUPPORT_AREA_POS_Y2, SUPPORT_AREA_POS_X1, SUPPORT_AREA_POS_Y1
+	line LOGIC_AREA_POS_X1, LOGIC_AREA_POS_Y1, LOGIC_AREA_POS_X2, LOGIC_AREA_POS_Y1
+	line LOGIC_AREA_POS_X2, LOGIC_AREA_POS_Y1, LOGIC_AREA_POS_X2, LOGIC_AREA_POS_Y2
+	line LOGIC_AREA_POS_X2, LOGIC_AREA_POS_Y2, LOGIC_AREA_POS_X1, LOGIC_AREA_POS_Y2
+	line LOGIC_AREA_POS_X1, LOGIC_AREA_POS_Y2, LOGIC_AREA_POS_X1, LOGIC_AREA_POS_Y1
+	return
+
+// マスのカラーを塗りつぶす
+#deffunc DispMassColor
+	for n, 0, 9
+		for m, 0, 9
+			if (bDispAnswer == 0) && (iDispCheckMode == CHECK_LOGIC) && isFalse(n, m) { color COLOR_YELLOW } // 論理的矛盾があれば黄色
+			else : if (iDispCheckMode == CHECK_ANSWER) && isClearFalse(n, m)          { color COLOR_YELLOW } // 解答データと比較して相違があれば黄色
+			else : if isStartEntered(n, m)                                            { color COLOR_GRAY }   // 履歴INDEX=0の固定(問題)データなら灰色
+			else                                                                      { _continue }          // カラーイベントがなければ塗りつぶさず白色となる
+			boxf DRAW_POS_X+n*MASS_LENGTH+1, DRAW_POS_Y+m*MASS_LENGTH+1, DRAW_POS_X+n*MASS_LENGTH+MASS_LENGTH-1, DRAW_POS_Y+m*MASS_LENGTH+MASS_LENGTH-1
+		next
+	next
+	if iCurMode == CURSOR_CANDIATE {
+		color COLOR_SKYBLUE
+		boxf DRAW_POS_X+cur_x*MASS_LENGTH+MASS_LENGTH/3*cur_x2, DRAW_POS_Y+cur_y*MASS_LENGTH+MASS_LENGTH/3*cur_y2, DRAW_POS_X+cur_x*MASS_LENGTH+MASS_LENGTH/3*(cur_x2+1), DRAW_POS_Y+cur_y*MASS_LENGTH+MASS_LENGTH/3*(cur_y2+1)
+	}
+	else {
+		color COLOR_SKYBLUE // 入力用カーソルの座標マスを水色で塗りつぶす
+		boxf DRAW_POS_X+cur_x*MASS_LENGTH+1, DRAW_POS_Y+cur_y*MASS_LENGTH+1, DRAW_POS_X+cur_x*MASS_LENGTH+MASS_LENGTH-1, DRAW_POS_Y+cur_y*MASS_LENGTH+MASS_LENGTH-1
+	}
+	return
+
+// マスの中のナンバーを表示
+#deffunc DispMassNumber
+	font FONT_NAME, FONT_SIZE_L
+	for n, 0, 9
+		for m, 0, 9
+			if        (isSearchingMode())                                                                  { color COLOR_BLACK } // 探索中
+			else : if (bDispAnswer == 1) && (bDispHint1 == 1) && (getClearNumber(n, m) == point_up_number) { color COLOR_GREEN } // カーソルが合っている強調ナンバーを緑色(クリアデータ)
+			else : if (bDispAnswer == 0) && (bDispHint1 == 1) && (getNumber(n, m) == point_up_number)      { color COLOR_GREEN } // カーソルが合っている強調ナンバーを緑色(現データ)
+			else : if (bDispAnswer == 0) && (answer_px == n) && (answer_py == m)                           { color COLOR_RED }   // 最終入力を赤色
+			else                                                                                           { color COLOR_BLACK } // 通常ナンバーは黒色
+			pos DRAW_POS_X+NUM_POS_X+n*MASS_LENGTH, DRAW_POS_Y+NUM_POS_Y+m*MASS_LENGTH
+			if (isSearchingMode()) { // 探索中
+				if isEntered(n, m)      { mes "0" }
+			}
+			else : if (bDispAnswer == 1) { // クリアデータ表示
+				if isClearEntered(n, m) { mes getClearNumber(n, m) } // 入力済みマスならナンバー表示
+			} // 現データ表示
+			else : if isEntered(n, m)   { mes getNumber(n, m) } // 入力済みマスならナンバー表示
+			if isNotSearchingMode() && isMark(n, m) {
+				color COLOR_BLACK
+				Boxline DRAW_POS_X+n*MASS_LENGTH+3, DRAW_POS_Y+m*MASS_LENGTH+3, DRAW_POS_X+n*MASS_LENGTH+MASS_LENGTH-3, DRAW_POS_Y+m*MASS_LENGTH+MASS_LENGTH-3, 0 // マークされているナンバーを丸で囲む
+			}
+		next
+	next
+	return
+
+// 9×9マスを表示
+#deffunc DispMass
+	color COLOR_BLACK
+	for n, 0, 10
+		if n\3 == 0 { // サブブロックの境界線は太い線で描画
+			ThickLine DRAW_POS_X, DRAW_POS_Y+n*MASS_LENGTH, DRAW_POS_X+MASS9_LENGTH, DRAW_POS_Y+n*MASS_LENGTH, LINE_THICK
+			ThickLine DRAW_POS_X+n*MASS_LENGTH, DRAW_POS_Y, DRAW_POS_X+n*MASS_LENGTH, DRAW_POS_Y+MASS9_LENGTH, LINE_THICK
+		}
+		else {
+			line DRAW_POS_X, DRAW_POS_Y+n*MASS_LENGTH, DRAW_POS_X+MASS9_LENGTH, DRAW_POS_Y+n*MASS_LENGTH
+			line DRAW_POS_X+n*MASS_LENGTH, DRAW_POS_Y, DRAW_POS_X+n*MASS_LENGTH, DRAW_POS_Y+MASS9_LENGTH
+		}
+	next
+	return
+
+// 候補ナンバーを表示
+#deffunc DispCandiateNumber
+	if bDispAnswer == 1 : return         // 解答表示ONなら表示しない
+	if iDispHint2 == HINT2_OFF : return  // 候補ナンバー表示OFFなら表示しない
+	for n, 0, 9
+		for m, 0, 9
+			if isEntered(n, m) : _continue
+			for q, 1, 10 // 対象ナンバー
+				pos DRAW_POS_X+n*MASS_LENGTH+MASS_LENGTH/3*((q-1)\3)+5, DRAW_POS_Y+m*MASS_LENGTH+MASS_LENGTH/3*((q-1)/3)+2
+				if iDispHint2 == HINT2_MANUAL { // 候補手動入力表示
+					if isDeleteInput(n, m, q) { // 直前にロジックによる候補削除が行われたナンバー(青色太字)
+						font FONT_NAME, FONT_SIZE_SS, 1
+						color COLOR_BLUE
+						mes STRING_DELETE_MARK
+					}
+					else : if isPossibleInput(n, m, q) {
+						if (bDispHint1 == 1) && (q == point_up_number) { // カーソルが合っている強調ナンバー(赤色)
+							font FONT_NAME, FONT_SIZE_SS
+							color COLOR_RED
+						}
+						else : if isLogicFlagInput(n, m, q) { // 直前にロジックによる候補削除が行われるきっかけとなったナンバー(青色太字)
+							font FONT_NAME, FONT_SIZE_SS, 1
+							color COLOR_BLUE 
+						}
+						else {
+							font FONT_NAME, FONT_SIZE_SS // 通常の候補ナンバー(黒色)
+							color COLOR_BLACK 
+						}						
+						mes q
+					}
+				}
+				else { // 候補自動入力表示
+					if isDelete(n, m, q) { // 直前にロジックによる候補削除が行われたナンバー(青色太字)
+						font FONT_NAME, FONT_SIZE_SS, 1
+						color COLOR_BLUE
+						mes STRING_DELETE_MARK
+					}				
+					else : if isPossibleNative(n, m, q) { // 候補として可能性があるナンバー
+						if (bDispHint1 == 1) && (q == point_up_number) { // カーソルが合っている強調ナンバー(赤色)
+							font FONT_NAME, FONT_SIZE_SS
+							color COLOR_RED
+						}
+						else : if isLogicFlag(n, m, q) { // 直前にロジックによる候補削除が行われるきっかけとなったナンバー(青色太字)
+							font FONT_NAME, FONT_SIZE_SS, 1
+							color COLOR_BLUE 
+						}
+						else {
+							font FONT_NAME, FONT_SIZE_SS // 通常の候補ナンバー(黒色)
+							color COLOR_BLACK 
+						}
+						mes q						
+					}
+				}
+			next
+		next
+	next
+	return
+
+// モード状態を表示
+#deffunc DispMode
+	font FONT_NAME, FONT_SIZE_L
+	pos DISP_MODE_POS_X, DISP_MODE_POS_Y
+	color COLOR_BLACK		
+	switch game_mode
+		case MODE_PLAY
+			mes STRING_MODE_PLAY
+			swbreak
+		case MODE_ANALYZE
+			mes STRING_MODE_ANALYZE
+			swbreak
+		case MODE_EDIT
+			mes STRING_MODE_EDIT
+			swbreak
+		case MODE_CLEAR
+			color COLOR_RED
+			mes STRING_MODE_CLEAR
+			swbreak
+		case MODE_NOT_CLEAR
+			color COLOR_RED
+			mes STRING_MODE_NOT_CLEAR
+			swbreak
+		case MODE_MAKING
+			mes STRING_MODE_MAKING
+			swbreak
+		case MODE_AUTO
+			mes STRING_MODE_AUTO
+			swbreak
+		case MODE_MAKE_CLEAR
+			mes STRING_MODE_MAKE_CLEAR
+			swbreak
+	swend
+	return
+
+// リストを表示(左右ボタンで変更できる文字列)
+#deffunc DispList int disp_ls_x, int disp_ls_y, int disp_ls_w, int disp_ls_h, int disp_ls_font_size, str disp_ls_name
+	font FONT_NAME, disp_ls_font_size
+	pos disp_ls_x+(disp_ls_w-disp_ls_font_size*strlen(disp_ls_name)/2)/2, disp_ls_y+(disp_ls_h-disp_ls_font_size)/2
+	color COLOR_BLACK
+	mes disp_ls_name
+	return
+	
+// ステータス状態を表示
+#deffunc DispStatus
+	font FONT_NAME, FONT_SIZE_M
+	pos DISP_STATUS_POS_X, DISP_STATUS_POS_Y	
+	color COLOR_RED	
+	switch failed_type
+		case FAILED_LOAD_FILE
+			mes STRING_FAILED_LOAD_FILE
+			swbreak
+		case FAILED_LOGIC
+			mes STRING_FAILED_LOGIC
+			swbreak
+		case FAILED_TIMEOUT
+			mes STRING_FAILED_TIMEOUT
+			swbreak
+		case FAILED_NOT_CLEAR
+			mes STRING_FAILED_NOT_CLEAR
+			swbreak
+		case FAILED_DOUBLE_CLEAR
+			mes STRING_FAILED_DOUBLE_CLEAR
+			swbreak
+		case FAILED_MAKE_PROBLEM
+			mes STRING_FAILED_MAKE_PROBLEM
+			swbreak
+	swend
+	return
+
+// 各スイッチのオンオフ状態を表示
+#deffunc DispOnOff
+	font FONT_NAME, FONT_SIZE_M
+	color COLOR_BLACK
+	// 解析結果表示
+	pos DISP_ANALYZE_POS_X, DISP_ANALYZE_POS_Y
+	if bAnalyze { mes STRING_ON }
+	else        { mes STRING_OFF }
+	// 解答表示
+	pos DISP_ANSWER_POS_X, DISP_ANSWER_POS_Y
+	if bDispAnswer { mes STRING_ON }
+	else           { mes STRING_OFF }
+	// チェック表示
+	pos DISP_CHECK_POS_X, DISP_CHECK_POS_Y
+	switch iDispCheckMode
+		case CHECK_OFF    // チェックなし
+			mes STRING_OFF
+			swbreak
+		case CHECK_LOGIC  // 論理的矛盾でチェック
+			mes STRING_CHECK_LOGIC
+			swbreak
+		case CHECK_ANSWER // 解答比較でチェック
+			mes STRING_CHECK_ANSWER
+			swbreak
+	swend
+	// 強調表示
+	pos DISP_HINT1_POS_X, DISP_HINT1_POS_Y
+	if bDispHint1 { mes STRING_ON }
+	else          { mes STRING_OFF }
+	// 候補表示
+	pos DISP_HINT2_POS_X, DISP_HINT2_POS_Y
+	switch iDispHint2
+		case HINT2_OFF // 表示なし
+			mes STRING_OFF
+			swbreak
+		case HINT2_MANUAL // 手動
+			mes STRING_HINT2_MANUAL
+			font FONT_NAME, FONT_SIZE_SS
+			pos DISP_MESSAGE_POS_X, DISP_MESSAGE_POS_Y
+			color COLOR_RED
+			mes STRING_MESSAGE
+			swbreak
+		case HINT2_AUTO // 自動
+			mes STRING_HINT2_AUTO
+			swbreak
+	swend
+	return
+
+// 候補適用用ロジックタイプ
+#deffunc DispLogicType
+	if iLogicType < 10 { str_buf = "[0" + str(iLogicType) + "] " }
+	else               { str_buf = "[" + str(iLogicType) + "] " }
+	switch iLogicType
+		case LOGIC_CLEAR
+			str_buf += STRING_LOGIC_CLEAR // "全消去(初期化)"
+			swbreak
+		case LOGIC_DEFAULT
+			str_buf += STRING_LOGIC_DEFAULT // "縦,横,ブロック(標準)"
+			swbreak
+		case LOGIC_LOCKED_1
+			str_buf += STRING_LOGIC_LOCKED_1 // "ロックされた候補1"
+			swbreak
+		case LOGIC_LOCKED_2
+			str_buf += STRING_LOGIC_LOCKED_2 // "ロックされた候補2"
+			swbreak
+		case LOGIC_NAKED_PAIRS
+			str_buf += STRING_LOGIC_NAKED_PAIRS // "2国同盟"
+			swbreak
+		case LOGIC_NAKED_TRIPLETS
+			str_buf += STRING_LOGIC_NAKED_TRIPLETS // "3国同盟"
+			swbreak
+		case LOGIC_NAKED_QUADS
+			str_buf += STRING_LOGIC_NAKED_QUADS // "4国同盟"
+			swbreak
+		case LOGIC_NAKED_QUINTETS
+		    str_buf += STRING_LOGIC_NAKED_QUINTETS // "5国同盟"
+		    swbreak
+		case LOGIC_NAKED_SEXTETS
+			str_buf += STRING_LOGIC_NAKED_SEXTETS // "6国同盟"
+			swbreak
+		case LOGIC_NAKED_SEPTETTE
+			str_buf += STRING_LOGIC_NAKED_SEPTETTE // "7国同盟"
+			swbreak
+		case LOGIC_NAKED_OCTETS
+			str_buf += STRING_LOGIC_NAKED_OCTETS // "8国同盟"
+			swbreak
+		case LOGIC_X_WING
+			str_buf += STRING_LOGIC_X_WING // "X-wing"
+			swbreak
+		case LOGIC_SKYCRAPER
+			str_buf += STRING_LOGIC_SKYCRAPER // "Skyscraper"
+			swbreak
+		case LOGIC_2_STRING_KITE
+			str_buf += STRING_LOGIC_2_STRING_KITE // "2-StringKite"
+			swbreak
+		case LOGIC_XY_WING
+			str_buf += STRING_LOGIC_XY_WING // "XY-wing"
+			swbreak
+		case LOGIC_SWORDFISH
+			str_buf += STRING_LOGIC_SWORDFISH // "Swordfish"
+			swbreak
+		case LOGIC_XYZ_WING
+			str_buf += STRING_LOGIC_XYZ_WING // "XYZ-wing"
+			swbreak
+		case LOGIC_REMOTE_PAIRS
+			str_buf += STRING_LOGIC_REMOTE_PAIRS // "RemotePairs"
+			swbreak
+		case LOGIC_SIMPLE_CHAIN
+			str_buf += STRING_LOGIC_SIMPLE_CHAIN // "SimpleChain"
+			swbreak
+		case LOGIC_BUG_1
+			str_buf += STRING_LOGIC_BUG_1 // "BUG+1"
+			swbreak
+		case LOGIC_XY_CHAIN
+			str_buf += STRING_LOGIC_XY_CHAIN // "XY-Chain"
+			swbreak
+		case LOGIC_JELLYFISH
+			str_buf += STRING_LOGIC_JELLYFISH // "Jellyfish"
+			swbreak
+		case LOGIC_WXYZ_WING
+			str_buf += STRING_LOGIC_WXYZ_WING // "WXYZ-wing"
+			swbreak
+		case LOGIC_FINNED_X_WING
+			str_buf += STRING_LOGIC_FINNED_X_WING // "FinnedX-wing"
+			swbreak
+		case LOGIC_FINNED_SWORDFISH
+			str_buf += STRING_LOGIC_FINNED_SWORDFISH // "FinnedSwordfish"
+			swbreak
+		case LOGIC_SQUIRMBAG
+			str_buf += STRING_LOGIC_SQUIRMBAG // "Squirmbag"
+			swbreak
+		case LOGIC_WHALE
+			str_buf += STRING_LOGIC_WHALE // "Whale"
+			swbreak
+		case LOGIC_LEVIATHAN
+			str_buf += STRING_LOGIC_LEVIATHAN // "Leviathan"
+			swbreak
+	swend
+	font FONT_NAME, FONT_SIZE_M
+	color COLOR_BLACK
+	pos LOGIC_BUTTON_POS_X+(LOGIC_BUTTON_WIDTH-strlen(str_buf)*FONT_SIZE_M/2)/2, LOGIC_NEXT_BUTTON_POS_Y+(LOGIC_NEXT_BUTTON_HEIGHT-FONT_SIZE_M)/2
+	mes str_buf
+	font FONT_NAME, FONT_SIZE_SS
+	pos LOGIC_BUTTON_POS_X+(LOGIC_BUTTON_WIDTH-strlen(str_buf)*FONT_SIZE_M/2)/2+strlen(str_buf)*FONT_SIZE_M/2+FONT_SIZE_SS/2, LOGIC_NEXT_BUTTON_POS_Y+(LOGIC_NEXT_BUTTON_HEIGHT-FONT_SIZE_M)/2+FONT_SIZE_M-FONT_SIZE_SS
+	if        iLogicEnable == LOGIC_ENABLE {
+		str_buf = STRING_LOGIC_ENABLE
+		color COLOR_BLUE
+		mes str_buf
+	else : if iLogicEnable == LOGIC_DISABLE {
+		str_buf = STRING_LOGIC_DISABLE
+		color COLOR_RED
+		mes str_buf
+	}
+	return
+
+// 問題ステータスを表示
+#deffunc DispStageStatus
+	font FONT_NAME, FONT_SIZE_M
+	color COLOR_BLACK
+	pos DISP_STAGE_STATUS_POS_X, DISP_STAGE_STATUS_POS_Y
+	mes stage_name + " 難易度判定>>"
+	color COLOR_LIGHT_YELLOW
+	boxf DISP_LOGIC_STATUS_POS_X1, DISP_LOGIC_STATUS_POS_Y1, DISP_LOGIC_STATUS_POS_X2, DISP_LOGIC_STATUS_POS_Y2
+
+	if bAnalyze == 0 : return
+	
+	// クリア手順までの解発見パターンの各総数
+	box_cnt      = answer_find_type_cnt(FIND_TYPE_BOX)
+	horizon_cnt  = answer_find_type_cnt(FIND_TYPE_HORIZON)
+	vertical_cnt = answer_find_type_cnt(FIND_TYPE_VERTICAL)
+	one_mass_cnt = answer_find_type_cnt(FIND_TYPE_ONE_MASS)
+	a_cnt = str(answer_find_logic_locked1_cnt)
+	b_cnt = str(answer_find_logic_locked2_cnt)
+	c_cnt = str(answer_find_logic_naked2_cnt)
+	d_cnt = str(answer_find_logic_naked3_cnt)
+	a_max = str(answer_find_step_locked1_max)
+	b_max = str(answer_find_step_locked2_max)
+	c_max = str(answer_find_step_naked2_max)
+	d_max = str(answer_find_step_naked3_max)
+	a_avg = str(answer_find_step_locked1_avg)
+	b_avg = str(answer_find_step_locked2_avg)
+	c_avg = str(answer_find_step_naked2_avg)
+	d_avg = str(answer_find_step_naked3_avg)
+	a_avg = strmid(a_avg, 0, 4)
+	b_avg = strmid(b_avg, 0, 4)
+	c_avg = strmid(c_avg, 0, 4)
+	d_avg = strmid(d_avg, 0, 4)
+	if a_avg == "0" : a_avg = "0.00"
+	if b_avg == "0" : b_avg = "0.00"
+	if c_avg == "0" : c_avg = "0.00"
+	if d_avg == "0" : d_avg = "0.00"
+	
+	font FONT_NAME, FONT_SIZE_SS
+	color COLOR_BLACK
+	pos DISP_FIND_TITLE_POS_X, DISP_FIND_TITLE_POS_Y
+	mes STRING_FIND_TYPE+STRING_LOGIC_COUNT
+	pos DISP_FIND_BOX_POS_X, DISP_FIND_BOX_POS_Y
+	if isBoxColorRed() { color COLOR_RED }
+	else               { color COLOR_BLACK }
+	mes STRING_FIND_BOX + box_cnt
+	pos DISP_FIND_HORIZON_POS_X, DISP_FIND_HORIZON_POS_Y
+	if isHorizonColorRed() { color COLOR_RED }
+	else                   { color COLOR_BLACK }	
+	mes STRING_FIND_HORIZON + horizon_cnt
+	pos DISP_FIND_VERTICAL_POS_X, DISP_FIND_VERTICAL_POS_Y
+	if isVerticalColorRed() { color COLOR_RED }
+	else                    { color COLOR_BLACK }	
+	mes STRING_FIND_VERTICAL + vertical_cnt
+	pos DISP_FIND_ONE_MASS_POS_X, DISP_FIND_ONE_MASS_POS_Y
+	if isOneMassColorRed() { color COLOR_RED }
+	else                   { color COLOR_BLACK }	
+	mes STRING_FIND_ONE_MASS + one_mass_cnt
+	
+	pos DISP_LOCKED1_TITLE_POS_X, DISP_LOCKED1_TITLE_POS_Y
+	if int(a_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }
+	mes STRING_LOGIC_LOCKED_1
+	color COLOR_BLACK
+	pos DISP_LOCKED1_COUNT_POS_X, DISP_LOCKED1_COUNT_POS_Y
+	mes STRING_LOGIC_COUNT, mesopt_nocr
+	if int(a_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }
+	mes a_cnt
+	color COLOR_BLACK
+	pos DISP_LOCKED1_AVERAGE_POS_X, DISP_LOCKED1_AVERAGE_POS_Y
+	mes STRING_LOGIC_AVERAGE + a_avg
+	pos DISP_LOCKED1_MAX_POS_X, DISP_LOCKED1_MAX_POS_Y
+	mes STRING_LOGIC_MAX + a_max
+	pos DISP_LOCKED2_TITLE_POS_X, DISP_LOCKED2_TITLE_POS_Y
+	if int(b_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }
+	mes STRING_LOGIC_LOCKED_2
+	color COLOR_BLACK
+	pos DISP_LOCKED2_COUNT_POS_X, DISP_LOCKED2_COUNT_POS_Y
+	mes STRING_LOGIC_COUNT, mesopt_nocr
+	if int(b_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }	
+	mes b_cnt
+	color COLOR_BLACK
+	pos DISP_LOCKED2_AVERAGE_POS_X, DISP_LOCKED2_AVERAGE_POS_Y
+	mes STRING_LOGIC_AVERAGE + b_avg
+	pos DISP_LOCKED2_MAX_POS_X, DISP_LOCKED2_MAX_POS_Y
+	mes STRING_LOGIC_MAX + b_max
+
+	pos DISP_NAKED_PAIRS_TITLE_POS_X, DISP_NAKED_PAIRS_TITLE_POS_Y
+	if int(c_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }
+	mes STRING_LOGIC_NAKED_PAIRS
+	color COLOR_BLACK
+	pos DISP_NAKED_PAIRS_COUNT_POS_X, DISP_NAKED_PAIRS_COUNT_POS_Y
+	mes STRING_LOGIC_COUNT, mesopt_nocr
+	if int(c_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }
+	mes c_cnt
+	color COLOR_BLACK
+	pos DISP_NAKED_PAIRS_AVERAGE_POS_X, DISP_NAKED_PAIRS_AVERAGE_POS_Y
+	mes STRING_LOGIC_AVERAGE + c_avg
+	pos DISP_NAKED_PAIRS_MAX_POS_X, DISP_NAKED_PAIRS_MAX_POS_Y
+	mes STRING_LOGIC_MAX + c_max
+	pos DISP_NAKED_TRIPLETS_TITLE_POS_X, DISP_NAKED_TRIPLETS_TITLE_POS_Y
+	if int(d_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }
+	mes STRING_LOGIC_NAKED_TRIPLETS
+	color COLOR_BLACK
+	pos DISP_NAKED_TRIPLETS_COUNT_POS_X, DISP_NAKED_TRIPLETS_COUNT_POS_Y
+	mes STRING_LOGIC_COUNT, mesopt_nocr
+	if int(d_cnt) > 0 { color COLOR_RED }
+	else              { color COLOR_BLACK }	
+	mes d_cnt
+	color COLOR_BLACK
+	pos DISP_NAKED_TRIPLETS_AVERAGE_POS_X, DISP_NAKED_TRIPLETS_AVERAGE_POS_Y
+	mes STRING_LOGIC_AVERAGE + d_avg
+	pos DISP_NAKED_TRIPLETS_MAX_POS_X, DISP_NAKED_TRIPLETS_MAX_POS_Y
+	mes STRING_LOGIC_MAX + d_max
+	
+	pos DISP_OTHER_TITLE_POS_X, DISP_OTHER_TITLE_POS_Y
+	mes STRING_LOGIC_OTHER+STRING_LOGIC_COUNT
+	pos DISP_OTHER_POS_X, DISP_OTHER_POS_Y
+	mes STRING_LOGIC_NAKED_QUADS + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH, DISP_OTHER_POS_Y
+	mes STRING_LOGIC_NAKED_QUINTETS + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*2, DISP_OTHER_POS_Y	
+	mes STRING_LOGIC_NAKED_SEXTETS + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*3, DISP_OTHER_POS_Y	
+	mes STRING_LOGIC_NAKED_SEPTETTE + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*4, DISP_OTHER_POS_Y	
+	mes STRING_LOGIC_NAKED_OCTETS + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*5, DISP_OTHER_POS_Y
+	mes STRING_LOGIC_X_WING + " " + 0
+	
+	pos DISP_OTHER_POS_X, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT
+	mes STRING_LOGIC_SKYCRAPER + " " + 0	
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT
+	mes STRING_LOGIC_2_STRING_KITE + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*2, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT
+	mes STRING_LOGIC_XY_WING + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*3, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT
+	mes STRING_LOGIC_SWORDFISH + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*4, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT
+	mes STRING_LOGIC_XYZ_WING + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*5, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT
+	mes STRING_LOGIC_REMOTE_PAIRS + " " + 0
+
+	
+	pos DISP_OTHER_POS_X, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*2
+	mes STRING_LOGIC_SIMPLE_CHAIN + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*2
+	mes STRING_LOGIC_BUG_1 + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*2, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*2
+	mes STRING_LOGIC_XY_CHAIN + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*3, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*2
+	mes STRING_LOGIC_JELLYFISH + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*4, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*2
+	mes STRING_LOGIC_WXYZ_WING + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*5, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*2
+	mes STRING_LOGIC_FINNED_X_WING + " " + 0
+
+	pos DISP_OTHER_POS_X, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*3
+	mes STRING_LOGIC_FINNED_SWORDFISH + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*3
+	mes STRING_LOGIC_SQUIRMBAG + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*2, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*3
+	mes STRING_LOGIC_WHALE + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*3, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*3
+	mes STRING_LOGIC_LEVIATHAN + " " + 0
+	pos DISP_OTHER_POS_X+DISP_OTHER_WIDTH*5, DISP_OTHER_POS_Y+DISP_LOGIC_HEIGHT*3
+	if answer_candiate_cnt > 1 { color COLOR_RED }
+	else                       { color COLOR_BLACK }
+	mes STRING_CANDIATE + " " + answer_candiate_cnt
+
+	return
+	
+// デバッグ情報を表示
+#deffunc DispDebugStatus
+	font FONT_NAME, FONT_SIZE_S
+	color COLOR_BLACK
+	pos DISP_LOGIC_TYPE_POS_X, DISP_LOGIC_TYPE_POS_Y
+	switch game_mode
+		case MODE_PLAY
+		case MODE_EDIT
+		case MODE_MAKING
+			mes STRING_DEBUG_LOGIC + " " + make_cnt + ":" + search_clear_cnt + ":"  + answer_logic_type + ":" + answer_candiate_cnt + ":" + answer_depth + ":" + search_node_cnt
+			swbreak
+		case MODE_AUTO
+		case MODE_MAKE_CLEAR
+			mes STRING_DEBUG_LOGIC + " " + make_cnt + ":" + search_clear_cnt + ":"  + search_logic_type(search_depth) + ":" + answer_candiate_cnt + ":" + search_depth + ":" + search_node_cnt
+			swbreak
+	swend
+	return
+	
+// 画面出力処理
+#deffunc Display
+	redraw 0 // 実際には描画せずにバッファに書き込むモード
+	color COLOR_WHITE
+	boxf 0, 0, WINDOW_W, WINDOW_H // バッファを白色で初期化
+
+	DispAreaLine       // エリア区分ラインの表示
+	if isNotSearchingMode() : DispMassColor      // マスのカラーを塗りつぶす
+	DispMassNumber     // マスの中のナンバーを表示
+	DispMass           // 9×9マスを表示
+	if isNotSearchingMode() : DispCandiateNumber // 候補ナンバーを表示
+	DispMode           // モード状態を表示
+	DispStatus         // ステータス状態を表示
+	DispOnOff          // 各スイッチのオンオフ状態を表示
+	DispLogicType      // 候補適用用ロジックタイプ表示
+	DispStageStatus    // 問題テータスを表示
+
+	// 各ボタン表示
+	DispBoxButton PLAY_BUTTON_POS_X, PLAY_BUTTON_POS_Y, PLAY_BUTTON_WIDTH, PLAY_BUTTON_HEIGHT, STRING_PLAY, FONT_SIZE_S, BUTTON_EVENT_PLAY, 1
+	DispBoxButton EDIT_BUTTON_POS_X, EDIT_BUTTON_POS_Y, EDIT_BUTTON_WIDTH, EDIT_BUTTON_HEIGHT, STRING_EDIT, FONT_SIZE_S, BUTTON_EVENT_EDIT, 1
+	if iDispHint2 == HINT2_MANUAL { enable = 1 }
+	else                          { enable = 0 }
+	DispBoxButton LOGIC_BUTTON_POS_X, LOGIC_BUTTON_POS_Y, LOGIC_BUTTON_WIDTH, LOGIC_BUTTON_HEIGHT, STRING_LOGIC, FONT_SIZE_S, BUTTON_EVENT_LOGIC, enable
+	DispLeftButton LOGIC_BACK_BUTTON_POS_X, LOGIC_BACK_BUTTON_POS_Y, LOGIC_BACK_BUTTON_WIDTH, LOGIC_BACK_BUTTON_HEIGHT, BUTTON_EVENT_LOGIC_BACK
+	DispRightButton LOGIC_NEXT_BUTTON_POS_X, LOGIC_NEXT_BUTTON_POS_Y, LOGIC_NEXT_BUTTON_WIDTH, LOGIC_NEXT_BUTTON_HEIGHT, BUTTON_EVENT_LOGIC_NEXT
+	DispBoxButton ANALYZE_BUTTON_POS_X, ANALYZE_BUTTON_POS_Y, ANALYZE_BUTTON_WIDTH, ANALYZE_BUTTON_HEIGHT, STRING_ANALYZE, FONT_SIZE_S, BUTTON_EVENT_ANALYZE, 1	
+	DispBoxButton ANSWER_BUTTON_POS_X, ANSWER_BUTTON_POS_Y, ANSWER_BUTTON_WIDTH, ANSWER_BUTTON_HEIGHT, STRING_ANSWER, FONT_SIZE_S, BUTTON_EVENT_ANSWER, 1
+	DispBoxButton CHECK_BUTTON_POS_X, CHECK_BUTTON_POS_Y, CHECK_BUTTON_WIDTH, CHECK_BUTTON_HEIGHT, STRING_CHECK, FONT_SIZE_S, BUTTON_EVENT_CHECK, 1
+	DispBoxButton HINT1_BUTTON_POS_X, HINT1_BUTTON_POS_Y, HINT1_BUTTON_WIDTH, HINT1_BUTTON_HEIGHT, STRING_HINT1, FONT_SIZE_S, BUTTON_EVENT_HINT1, 1
+	DispBoxButton HINT2_BUTTON_POS_X, HINT2_BUTTON_POS_Y, HINT2_BUTTON_WIDTH, HINT2_BUTTON_HEIGHT, STRING_HINT2, FONT_SIZE_S, BUTTON_EVENT_HINT2, 1
+	DispBoxButton SAVE_BUTTON_POS_X, SAVE_BUTTON_POS_Y, SAVE_BUTTON_WIDTH, SAVE_BUTTON_HEIGHT, STRING_SAVE, FONT_SIZE_S, BUTTON_EVENT_SAVE, 1
+	DispBoxButton LOAD_BUTTON_POS_X, LOAD_BUTTON_POS_Y, LOAD_BUTTON_WIDTH, LOAD_BUTTON_HEIGHT, STRING_LOAD, FONT_SIZE_S, BUTTON_EVENT_LOAD, 1
+	if isPlayMode() { enable = 1 }
+	else            { enable = 0 }
+	DispBoxButton AUTO_BUTTON_POS_X, AUTO_BUTTON_POS_Y, AUTO_BUTTON_WIDTH, AUTO_BUTTON_HEIGHT, STRING_AUTO, FONT_SIZE_S, BUTTON_EVENT_AUTO, enable
+	if isEditMode() { enable = 1 }
+	else            { enable = 0 }	
+	DispBoxButton NEW_BUTTON_POS_X, NEW_BUTTON_POS_Y, NEW_BUTTON_WIDTH, NEW_BUTTON_HEIGHT, STRING_NEW, FONT_SIZE_S, BUTTON_EVENT_NEW, enable
+	DispBoxButton MAKE_CANDIATE_BUTTON_POS_X, MAKE_CANDIATE_BUTTON_POS_Y, MAKE_CANDIATE_BUTTON_WIDTH, MAKE_CANDIATE_BUTTON_HEIGHT, STRING_MAKE_CANDIATE, FONT_SIZE_S, BUTTON_EVENT_MAKE_CANDIATE, enable	
+	DispBoxButton MAKE_PROBLEM_BUTTON_POS_X, MAKE_PROBLEM_BUTTON_POS_Y, MAKE_PROBLEM_BUTTON_WIDTH, MAKE_PROBLEM_BUTTON_HEIGHT, STRING_MAKE_PROBLEM, FONT_SIZE_S, BUTTON_EVENT_MAKE_PROBLEM, enable
+	DispLeftButton LEVEL_DOWN_BUTTON_POS_X, LEVEL_DOWN_BUTTON_POS_Y, LEVEL_DOWN_BUTTON_WIDTH, LEVEL_DOWN_BUTTON_HEIGHT, BUTTON_EVENT_LEVEL_DOWN
+	DispRightButton LEVEL_UP_BUTTON_POS_X, LEVEL_UP_BUTTON_POS_Y, LEVEL_UP_BUTTON_WIDTH, LEVEL_UP_BUTTON_HEIGHT, BUTTON_EVENT_LEVEL_UP	
+	if isNotEditMode() { enable = 1 }
+	else               { enable = 0 }
+	DispBoxButton MOVE_BUTTON_POS_X, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT, STRING_BEGIN, FONT_SIZE_S, BUTTON_EVENT_MOVE_BEGIN, enable
+	DispBoxButton MOVE_BUTTON_POS_X+MOVE_BUTTON_DISTANCE_X, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT, STRING_BACK, FONT_SIZE_S, BUTTON_EVENT_MOVE_BACK, enable
+	DispBoxButton MOVE_BUTTON_POS_X+MOVE_BUTTON_DISTANCE_X*2, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT, STRING_NEXT, FONT_SIZE_S, BUTTON_EVENT_MOVE_NEXT, enable
+	DispBoxButton MOVE_BUTTON_POS_X+MOVE_BUTTON_DISTANCE_X*3, MOVE_BUTTON_POS_Y, MOVE_BUTTON_WIDTH, MOVE_BUTTON_HEIGHT, STRING_END, FONT_SIZE_S, BUTTON_EVENT_MOVE_END, enable
+	DispBoxButton MARK_BUTTON_POS_X+MARK_BUTTON_DISTANCE_X*3, MARK_BUTTON_POS_Y, MARK_BUTTON_WIDTH, MARK_BUTTON_HEIGHT, STRING_MARK, FONT_SIZE_S, BUTTON_EVENT_MARK, 1
+	DispCircleButton NUMBER_BUTTON_POS_X, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "1", FONT_SIZE_M, BUTTON_EVENT_1
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "2", FONT_SIZE_M, BUTTON_EVENT_2
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*2, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "3", FONT_SIZE_M, BUTTON_EVENT_3
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*3, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "4", FONT_SIZE_M, BUTTON_EVENT_4
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*4, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "5", FONT_SIZE_M, BUTTON_EVENT_5
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*5, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "6", FONT_SIZE_M, BUTTON_EVENT_6
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*6, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "7", FONT_SIZE_M, BUTTON_EVENT_7
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*7, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "8", FONT_SIZE_M, BUTTON_EVENT_8
+	DispCircleButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*8, NUMBER_BUTTON_POS_Y, NUMBER_BUTTON_WIDTH, NUMBER_BUTTON_HEIGHT, "9", FONT_SIZE_M, BUTTON_EVENT_9
+	DispBoxButton NUMBER_BUTTON_POS_X+NUMBER_BUTTON_DISTANCE_X*9, NUMBER_BUTTON_POS_Y, DELETE_BUTTON_WIDTH, DELETE_BUTTON_HEIGHT, STRING_DELETE, FONT_SIZE_M, BUTTON_EVENT_0, 1
+
+	switch iLevel
+		case 1
+			str_lv = STRING_LV_1
+			swbreak
+		case 2
+			str_lv = STRING_LV_2		
+			swbreak
+		case 3
+			str_lv = STRING_LV_3		
+			swbreak
+		case 4
+			str_lv = STRING_LV_4		
+			swbreak
+		case 5
+			str_lv = STRING_LV_5		
+			swbreak
+	swend
+	DispList LEVEL_DOWN_BUTTON_POS_X, LEVEL_DOWN_BUTTON_POS_Y, BUTTON_SIZE_M_WIDTH, BUTTON_SIZE_M_HEIGHT, FONT_SIZE_M, str_lv
+	
+	DispDebugStatus // デバッグ情報を表示
+	
+	redraw 1 // バッファに書き込んだデータを実際に描画する
+
+	return
+	
+// 太さのある線を描画
+#deffunc ThickLine int line_x1, int line_y1, int line_x2, int line_y2, int thick
+	a = double(line_x2-line_x1)
+	b = double(line_y2-line_y1)
+	r = sqrt(a*a+b*b)
+	sin_ = a/r
+	cos_ = b/r
+	x1_ = line_x1-double(thick)*sin_
+	y1_ = line_y1-double(thick)*cos_
+	x2_ = line_x2+double(thick)*sin_
+	y2_ = line_y2+double(thick)*cos_
+	for t, 0, thick+1
+		x1__ = x1_+double(t)*cos_
+		y1__ = y1_+double(t)*sin_
+		x2__ = x1_-double(t)*cos_
+		y2__ = y1_-double(t)*sin_
+		x3__ = x2_+double(t)*cos_
+		y3__ = y2_+double(t)*sin_
+		x4__ = x2_-double(t)*cos_
+		y4__ = y2_-double(t)*sin_
+		line x1__, y1__, x3__, y3__
+		line x2__, y2__, x4__, y4__
+	next
+	return
+
+// 四角形を線で描画(中は塗りつぶさない)
+#deffunc BoxLine int left_x, int up_y, int right_x, int bottom_y, int box_thick
+	ThickLine left_x, up_y, right_x, up_y, box_thick
+	ThickLine right_x, up_y, right_x, bottom_y, box_thick
+	ThickLine right_x, bottom_y, left_x, bottom_y, box_thick
+	ThickLine left_x, bottom_y, left_x, up_y, box_thick
+	return
+
+/*********************************** 開発メモ ************************************/
+//候補ナンバー入力条件満たすナンバー入力（中途問題作成）
+//delete_flag ナンバー記録型リスト追加
+//候補ナンバー入力から問題作成
+//かぶらない領域表示ヒント機能
+//エクセレント機能
+//スコアリファクタリング
+//ボタン自作
+//上級ロジック追加
+//仮置き？
+//候補入力履歴対応　論理的矛盾オンオフ※いらない
+// カーソルロック後入力
+// 右クリック選択またはキー、ボタン直接入力
+// マウス領域外れると候補カーソル消える？
+// 候補カーソル表示
+// 演出
+// ロジック後どこが消えるか
+//   消えたマス1bit判定return TYPE_A LOOP数
+//   消えたマスTYPE_A判定
+//
+// 最後に全方位1候補判定
+// 右クリックアップイベント（採用）
+// クリック変化どうする？実行処理と描画処理ループ
+// なんのロジックを使ったか判定
+// 演出（音、アニメーション）(不採用)
+// 高速処理(候補消去時、可能性０判定)
+// AI難易度判定結果
+// 候補履歴保存読み込み
+// シングルFIND高速発見
+/**********************************************************************************/
